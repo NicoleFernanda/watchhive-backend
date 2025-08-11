@@ -1,12 +1,11 @@
-schemaVersion: 1.0.0
+schemaVersion: "1.2"
 endpoints:
-  - name: api-endpoints-watchhive
-    displayName: WatchHive API Endpoints
-    description: API endpoints for WatchHive
-    service:
-      port: 8000
-      basePath: /
-    type: REST
-    networkVisibilities:
-      - Project
-      - Public
+    - name: rest-api-be2
+      displayName: REST API
+      service:
+        basePath: /
+        port: 8000
+      type: REST
+      networkVisibilities:
+        - Project
+        - Public
