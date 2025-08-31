@@ -1,43 +1,31 @@
-import uvicorn
 from fastapi import FastAPI
-from pydantic import BaseModel
 from fastapi.middleware.cors import CORSMiddleware
-from typing import List
 
-class Fruit(BaseModel):
-    name: str
+from core.settings import settings 
+from db.database import create_tables
+from routers.load_data import load_data_router
 
-class Fruits(BaseModel):
-    fruits: List[Fruit]
+create_tables()  # Create tables at startup if they don't exist
 
-app = FastAPI()
 
-origins = [
-    "http://localhost:5173",
-]
+app = FastAPI(
+    title="WatchHive API",
+    description="API for WatchHive, a colaborative platform to share thoughts and reviews about movies and series.",
+    version="1.0.0",
+    docs_url="/docs",
+    redoc_url="/redoc",
+)
 
 app.add_middleware(
-    CORSMiddleware,
-    allow_origins=origins,
+    CORSMiddleware, # Enable CORS for frontend development
+    allow_origins=settings.ALLOWED_ORIGINS,
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
 
-memory = {"fruits": []}
-
-@app.get("/")
-async def read_root():
-    return {"Hello": "World"}
-
-@app.get("/fruits", response_model=Fruits)
-def get_fruits():
-    return Fruits(fruits=memory["fruits"])
-
-@app.post("/fruits", response_model=Fruit)
-def create_fruit(fruit: Fruit):
-    memory["fruits"].append(fruit)
-    return fruit
+app.include_router(load_data_router, prefix=settings.API_PREFIX)
 
 if __name__ == "__main__":
-    uvicorn.run(app, host="0.0.0.0", port=8000)
+    import uvicorn
+    uvicorn.run(app, host="0.0.0.0", port=8000, reload=True)
