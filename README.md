@@ -1,3 +1,6 @@
+# branch  backup
+Serve para guardar o código original de como funcionava dentro da plataforma Choreo. Portanto, caso dê algum erro irritante, é possível ter o código inicial como parâmetro.
+
 # 🎬 watchhive-backend
 
 API backend do TCC para um site de avaliação e recomendação de filmes e séries.
