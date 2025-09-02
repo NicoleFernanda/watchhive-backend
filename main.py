@@ -7,7 +7,7 @@ from core.settings import settings
 from routes.fruit_routes import fruits_router
 
 app = FastAPI()
-app.include_router(fruits_router, prefix=settings.API_PREFIX)
+app.include_router(fruits_router)
 
 
 app.add_middleware(
