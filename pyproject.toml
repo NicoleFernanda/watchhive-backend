@@ -5,7 +5,39 @@ description = "Add your description here"
 readme = "README.md"
 requires-python = ">=3.12"
 dependencies = [
-    "fastapi>=0.116.1",
+    "fastapi[standard]>=0.116.1",
     "pydantic>=2.11.7",
+    "pydantic-settings>=2.10.1",
     "uvicorn>=0.35.0",
 ]
+
+[dependency-groups]
+dev = [
+    "pytest>=8.4.1",
+    "pytest-cov>=6.2.1",
+    "ruff>=0.12.11",
+    "taskipy>=1.14.1",
+]
+
+[tool.pytest.ini_options]
+pythonpath = "."
+addopts = '-p no:warnings'
+
+[tool.ruff]
+line-length = 119
+extend-exclude = ['migrations']
+
+[tool.ruff.format]
+preview = true
+quote-style = 'single'
+
+[tool.ruff.lint]
+preview = true
+select = ['I', 'F', 'E', 'W', 'PL', 'PT']
+
+[tool.taskipy.tasks]
+check = 'ruff check .'
+format = 'ruff check . --fix'
+run = 'uvicorn main:app --reload'
+cov = 'coverage html'
+requirements = 'uv export > requirements.txt'
