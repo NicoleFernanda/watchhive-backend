@@ -1,14 +1,9 @@
+
 import uvicorn
 from fastapi import FastAPI
-from pydantic import BaseModel
 from fastapi.middleware.cors import CORSMiddleware
-from typing import List
 
-class Fruit(BaseModel):
-    name: str
-
-class Fruits(BaseModel):
-    fruits: List[Fruit]
+from routers.fruit import fruit_router
 
 app = FastAPI()
 
@@ -24,20 +19,14 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-memory = {"fruits": []}
+app.include_router(fruit_router)
+
 
 @app.get("/")
 async def read_root():
     return {"Hello": "World"}
 
-@app.get("/fruits", response_model=Fruits)
-def get_fruits():
-    return Fruits(fruits=memory["fruits"])
-
-@app.post("/fruits", response_model=Fruit)
-def create_fruit(fruit: Fruit):
-    memory["fruits"].append(fruit)
-    return fruit
 
 if __name__ == "__main__":
-    uvicorn.run(app, host="0.0.0.0", port=8000)
+    # uvicorn.run(app, host="0.0.0.0", port=8000, reload=True)
+    uvicorn.run("main:app", host="0.0.0.0", port=8000, reload=True)
