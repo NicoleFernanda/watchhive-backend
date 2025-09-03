@@ -1,5 +1,4 @@
 from fastapi import APIRouter
-
 from schemas.fruit import Fruit, Fruits
 
 fruit_router = APIRouter(prefix="/fruits")
