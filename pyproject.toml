@@ -5,9 +5,11 @@ description = "Add your description here"
 readme = "README.md"
 requires-python = ">=3.12"
 dependencies = [
-    "fastapi>=0.116.1",
+    "alembic>=1.16.5",
+    "fastapi[standard]>=0.116.1",
     "pydantic>=2.11.7",
     "pydantic-settings>=2.10.1",
+    "sqlalchemy>=2.0.43",
     "uvicorn>=0.35.0",
 ]
 
@@ -40,4 +42,5 @@ check = 'ruff check .'
 format = 'ruff check . --fix'
 run = 'uvicorn main:app --reload'
 cov = 'coverage html'
+test = 'pytest -s -x --cov -vv'
 requirements = 'uv export > requirements.txt'

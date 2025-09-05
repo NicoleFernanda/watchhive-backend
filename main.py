@@ -2,15 +2,15 @@
 import uvicorn
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from routers.fruit import fruit_router
+
+from routers.user_routes import user_router
 
 app = FastAPI(
-    root_path="/watchhive/watchhive-backend/v1.0"
+    title="WatchHive"
 )
 
 origins = [
     "http://localhost:5173",
-    "https://cb2c9f90-c05a-429e-ad6d-5c4fe716793f.e1-us-east-azure.choreoapps.dev",
 ]
 
 app.add_middleware(
@@ -21,7 +21,7 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-app.include_router(fruit_router)
+app.include_router(user_router)
 
 
 @app.get("/")
