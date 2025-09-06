@@ -1,17 +1,31 @@
 from contextlib import contextmanager
 from datetime import datetime
+
 import pytest
 from fastapi.testclient import TestClient
-from sqlalchemy import create_engine, event
+from sqlalchemy import StaticPool, create_engine, event
 from sqlalchemy.orm import Session
 
+from database import get_session
 from main import app
 from models.base import Base
+from models.user_model import User
 
 
 @pytest.fixture
-def client():
-    return TestClient(app)
+def client(session):
+    """
+    Nesse caso, no lugar de chamar o get_session com os dados do meu banco dem produção, ele chama uma função que eu escolhi.
+    Portanto nos testes, eu passo a utilizar o banco em memória - que é resetado a cada teste. 
+    """
+    def get_session_override():
+        return session
+
+    with TestClient(app) as client:
+        app.dependency_overrides[get_session] = get_session_override
+        yield client
+
+    app.dependency_overrides.clear()
 
 
 @pytest.fixture
@@ -22,7 +36,12 @@ def session():
     Cria um engine SQLite em memória, todas as tabelas, fornece uma sessão ativa para testes e,
     ao final do teste, remove todas as tabelas, garantindo isolamento entre testes.
     """
-    engine = create_engine('sqlite:///:memory:')  # cria conexão
+    engine = create_engine(
+        'sqlite:///:memory:',
+        connect_args={'check_same_thread': False},
+        poolclass=StaticPool, # executa nas mesmas threads
+    )# cria conexão
+
     Base.metadata.create_all(engine)
 
     with Session(engine) as session:  # cria uma sessão de troca entre o banco e o codigo
@@ -40,7 +59,7 @@ def mock_db_time():
 def _mock_db_time(*, model, time=datetime(2025, 9, 4)):
     """
     Toda vez que uma instância for inserida no banco,
-    executa o hook `fake_time_hook` antes de inseri-lo. 
+    executa o hook `fake_time_hook` antes de inseri-lo.
     O hook permite inspecionar ou modificar a instância antes que ela seja salva no banco.
 
     Args:
@@ -59,9 +78,20 @@ def _mock_db_time(*, model, time=datetime(2025, 9, 4)):
             target.created_at = time
         if hasattr(target, 'updated_at'):
             target.updated_at = time
-    
+
     event.listen(model, 'before_insert', fake_time_hook)
 
     yield time
 
     event.remove(model, 'before_insert', fake_time_hook)
+
+
+# objetos no banco
+@pytest.fixture
+def user(session):
+    user = User(username='bee', email='bee@test.com', password='beelover')
+    session.add(user)
+    session.commit()
+    session.refresh(user)
+
+    return user
