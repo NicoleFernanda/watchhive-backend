@@ -4,6 +4,8 @@ variables or a .env file.
 """
 
 
+from typing import List
+
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
@@ -16,6 +18,14 @@ class Settings(BaseSettings):
 
     DATABASE_URL: str = None
     ALLOWED_ORIGINS: str = ""
+
+    def get_allowed_origins(self) -> List[str]:
+        """
+        Transforma a string vinda do .env em lista de URLs.
+        """
+        if not self.ALLOWED_ORIGINS:
+            return []
+        return [origin.strip() for origin in self.ALLOWED_ORIGINS.split(",")]
 
 
 settings = Settings()

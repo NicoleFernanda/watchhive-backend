@@ -2,8 +2,8 @@ from http import HTTPStatus
 
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy import select
-from sqlalchemy.orm import Session
 from sqlalchemy.exc import IntegrityError
+from sqlalchemy.orm import Session
 
 from database import get_session
 from models.user_model import User
@@ -77,7 +77,7 @@ def update(user_id: int, user: CreateUserSchema, session: Session = Depends(get_
 
 
 @user_router.delete('/{user_id}', response_model=Message)
-def delete(user_id: int,  session: Session = Depends(get_session)):
+def delete(user_id: int, session: Session = Depends(get_session)):
     db_user = session.scalar(select(User).where(User.id == user_id))
 
     if not db_user:
@@ -92,7 +92,7 @@ def delete(user_id: int,  session: Session = Depends(get_session)):
 
 
 @user_router.get('/{user_id}', response_model=GetUserSchema)
-def read_user(user_id: int,  session: Session = Depends(get_session)):
+def read_user(user_id: int, session: Session = Depends(get_session)):
     db_user = session.scalar(select(User).where((User.id == user_id)))
 
     if not db_user:

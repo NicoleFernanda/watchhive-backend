@@ -10,13 +10,15 @@ from database import get_session
 from main import app
 from models.base import Base
 from models.user_model import User
+from security import get_password_hash
 
 
 @pytest.fixture
 def client(session):
     """
-    Nesse caso, no lugar de chamar o get_session com os dados do meu banco dem produção, ele chama uma função que eu escolhi.
-    Portanto nos testes, eu passo a utilizar o banco em memória - que é resetado a cada teste. 
+    Nesse caso, no lugar de chamar o get_session com os dados do meu banco dem produção,
+    ele chama uma função que eu escolhi. Portanto nos testes, eu passo a utilizar o banco
+    em memória - que é resetado a cada teste.
     """
     def get_session_override():
         return session
@@ -39,8 +41,8 @@ def session():
     engine = create_engine(
         'sqlite:///:memory:',
         connect_args={'check_same_thread': False},
-        poolclass=StaticPool, # executa nas mesmas threads
-    )# cria conexão
+        poolclass=StaticPool,  # executa nas mesmas threads
+    )  # cria conexão
 
     Base.metadata.create_all(engine)
 
@@ -89,9 +91,12 @@ def _mock_db_time(*, model, time=datetime(2025, 9, 4)):
 # objetos no banco
 @pytest.fixture
 def user(session):
-    user = User(username='bee', email='bee@test.com', password='beelover')
+    password = 'beelover'
+    user = User(username='bee', email='bee@test.com', password=get_password_hash(password))
     session.add(user)
     session.commit()
     session.refresh(user)
+
+    user.clean_password = password  # monkey patch
 
     return user

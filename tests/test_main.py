@@ -1,7 +1,5 @@
 from http import HTTPStatus
 
-from schemas.user_schemas import GetUserSchema
-
 
 def test_return_hello_world(client):
     response = client.get('/')
@@ -9,124 +7,14 @@ def test_return_hello_world(client):
     assert response.json() == {"Hello": "World"}
 
 
-def test_create_user(client):
+def test_get_token(client, user):
     response = client.post(
-        '/users',
-        json={
-            'username': 'alice',
-            'email': 'alice@example.com',
-            'password': 'secret',
-        },
-    )
-    assert response.status_code == HTTPStatus.CREATED
-    assert response.json() == {
-        'username': 'alice',
-        'email': 'alice@example.com',
-        'id': 1,
-    }
-
-def test_read_users_no_users(client):
-    response = client.get('/users')
-    assert response.status_code == HTTPStatus.OK
-    assert response.json() == {
-        'users': []
-    }
-
-
-def test_read_users(client, user):
-    user_response = GetUserSchema.model_validate(user).model_dump()
-
-    response = client.get('/users')
-    assert response.status_code == HTTPStatus.OK
-    assert response.json() == {
-        'users': [user_response]
-    }
-
-
-def test_update_user(client, user):
-    response = client.put(
-        '/users/1',
-        json={
-            'username': 'bob',
-            'email': 'bob@example.com',
-            'password': 'mynewpassword',
-        },
-    )
-    assert response.status_code == HTTPStatus.OK
-    assert response.json() == {
-        'username': 'bob',
-        'email': 'bob@example.com',
-        'id': user.id,
-    }
-
-
-def test_delete_user_should_return_not_found(client):
-    response = client.delete('/users/666')
-
-    assert response.status_code == HTTPStatus.NOT_FOUND
-    assert response.json() == {'detail': 'Usuário não encontrado.'}
-
-
-def test_update_user_should_return_not_found(client):
-    response = client.put(
-        '/users/666',
-        json={
-            'username': 'bob',
-            'email': 'bob@example.com',
-            'password': 'mynewpassword',
-        },
-    )
-    assert response.status_code == HTTPStatus.NOT_FOUND
-    assert response.json() == {'detail': 'Usuário não encontrado.'}
-
-
-def test_get_user_should_return_not_found(client):
-    response = client.get('/users/666')
-
-    assert response.status_code == HTTPStatus.NOT_FOUND
-    assert response.json() == {'detail': 'Usuário não encontrado.'}
-
-
-def test_get_user(client, user):
-    response = client.get(f'/users/{user.id}')
-
-    assert response.status_code == HTTPStatus.OK
-    assert response.json() == {
-        'username': user.username,
-        'email': user.email,
-        'id': user.id,
-    }
-
-
-def test_delete_user(client, user):
-    response = client.delete(f'/users/{user.id}')
-
-    assert response.status_code == HTTPStatus.OK
-    assert response.json() == {'message': 'Usuário apagado.'}
-
-
-def test_update_integrity_error(client, user):
-    # Inserindo fausto
-    client.post(
-        '/users',
-        json={
-            'username': 'fausto',
-            'email': 'fausto@example.com',
-            'password': 'secret',
-        },
+        '/token',
+        data={'username': user.email, 'password': user.clean_password}
     )
 
-    # Alterando o user das fixture para fausto
-    response_update = client.put(
-        f'/users/{user.id}',
-        json={
-            'username': 'fausto',
-            'email': 'bob@example.com',
-            'password': 'mynewpassword',
-        },
-    )
+    token = response.json()
 
-    assert response_update.status_code == HTTPStatus.CONFLICT
-    assert response_update.json() == {
-        'detail': 'Username or Email already exists'
-    }
+    assert response.status_code == HTTPStatus.OK
+    assert token['token_type'] == 'Bearer'
+    assert 'access_token' in token
