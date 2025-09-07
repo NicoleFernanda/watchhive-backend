@@ -16,8 +16,11 @@ class Settings(BaseSettings):
         extra="ignore"
     )
 
-    DATABASE_URL: str = None
-    ALLOWED_ORIGINS: str = ""
+    DATABASE_URL: str
+    ALLOWED_ORIGINS: str
+    SECRET_KEY: str
+    ACCESS_TOKEN_EXPIRE_MINUTES: int
+    ALGORITHM: str
 
     def get_allowed_origins(self) -> List[str]:
         """

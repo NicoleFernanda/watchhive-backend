@@ -1,10 +1,6 @@
 from pydantic import BaseModel, ConfigDict, EmailStr
 
 
-class Message(BaseModel):
-    message: str
-
-
 class CreateUserSchema(BaseModel):
     username: str
     email: EmailStr  # formato de e-mail, com o @

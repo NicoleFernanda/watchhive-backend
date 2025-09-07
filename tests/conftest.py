@@ -11,6 +11,7 @@ from main import app
 from models.base import Base
 from models.user_model import User
 from security import get_password_hash
+from settings import Settings
 
 
 @pytest.fixture
@@ -101,11 +102,17 @@ def user(session):
 
     return user
 
+
 @pytest.fixture
 def token(client, user):
     response = client.post(
-        'token', 
+        '/auth/token',
         data={'username': user.email, 'password': user.clean_password}
     )
 
     return response.json()['access_token']
+
+
+@pytest.fixture
+def settings():
+    return Settings()

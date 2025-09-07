@@ -1,22 +1,24 @@
 from http import HTTPStatus
+from typing import Annotated
 
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, Query
+from schemas.commons_schemas import FilterPage, Message
 from sqlalchemy import select
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 
 from database import get_session
 from models.user_model import User
-from schemas.user_schemas import CreateUserSchema, GetUserListSchema, GetUserSchema, Message
+from schemas.user_schemas import CreateUserSchema, GetUserListSchema, GetUserSchema
 from security import get_current_user, get_password_hash
 
-user_router = APIRouter(prefix="/users")
-
-database = []
+user_router = APIRouter(prefix="/users", tags=['users'])
+T_Session = Annotated[Session, Depends(get_session)]
+CurrentUser = Annotated[User, Depends(get_current_user)]
 
 
 @user_router.post('/', status_code=HTTPStatus.CREATED, response_model=GetUserSchema)
-def create(user: CreateUserSchema, session: Session = Depends(get_session)):
+def create(user: CreateUserSchema, session: T_Session):
 
     db_user = session.scalar(
         select(User).where(
@@ -49,21 +51,20 @@ def create(user: CreateUserSchema, session: Session = Depends(get_session)):
 
 @user_router.get('/', status_code=HTTPStatus.OK, response_model=GetUserListSchema)
 def read_all(
-    limit: int = 10, 
-    offset: int = 0, 
-    session: Session = Depends(get_session), 
-    current_user = Depends(get_current_user)
+    session: T_Session,
+    current_user: CurrentUser,
+    filter_users: Annotated[FilterPage, Query()]
 ):
-    users = session.scalars(select(User).limit(limit).offset(offset))
+    users = session.scalars(select(User).limit(filter_users.limit).offset(filter_users.offset))
     return {"users": users}
 
 
 @user_router.put('/{user_id}', status_code=HTTPStatus.OK, response_model=GetUserSchema)
 def update(
-    user_id: int, 
-    user: CreateUserSchema, 
-    session: Session = Depends(get_session),
-    current_user: User = Depends(get_current_user)
+    user_id: int,
+    user: CreateUserSchema,
+    session: T_Session,
+    current_user: CurrentUser
 ):
     if current_user.id != user_id:
         raise HTTPException(
@@ -89,9 +90,9 @@ def update(
 
 @user_router.delete('/{user_id}', response_model=Message)
 def delete(
-    user_id: int, 
-    session: Session = Depends(get_session),
-    current_user: User = Depends(get_current_user)
+    user_id: int,
+    session: T_Session,
+    current_user: CurrentUser
 ):
     if current_user.id != user_id:
         raise HTTPException(
@@ -106,7 +107,7 @@ def delete(
 
 
 @user_router.get('/{user_id}', response_model=GetUserSchema)
-def read_user(user_id: int, session: Session = Depends(get_session)):
+def read_user(user_id: int, session: T_Session):
     db_user = session.scalar(select(User).where((User.id == user_id)))
 
     if not db_user:

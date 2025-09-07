@@ -30,7 +30,7 @@ def test_read_users(client, user, token):
     }
 
 
-def test_update_user(client, user, token ):
+def test_update_user(client, user, token):
     response = client.put(
         '/users/1',
         json={
