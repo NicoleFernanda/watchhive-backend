@@ -8,7 +8,7 @@ from sqlalchemy.orm import Session
 from database import get_session
 from models.user_model import User
 from schemas.user_schemas import CreateUserSchema, GetUserListSchema, GetUserSchema, Message
-from security import get_password_hash
+from security import get_current_user, get_password_hash
 
 user_router = APIRouter(prefix="/users")
 
@@ -48,44 +48,58 @@ def create(user: CreateUserSchema, session: Session = Depends(get_session)):
 
 
 @user_router.get('/', status_code=HTTPStatus.OK, response_model=GetUserListSchema)
-def read_all(limit: int = 10, offset: int = 0, session: Session = Depends(get_session)):
+def read_all(
+    limit: int = 10, 
+    offset: int = 0, 
+    session: Session = Depends(get_session), 
+    current_user = Depends(get_current_user)
+):
     users = session.scalars(select(User).limit(limit).offset(offset))
     return {"users": users}
 
 
 @user_router.put('/{user_id}', status_code=HTTPStatus.OK, response_model=GetUserSchema)
-def update(user_id: int, user: CreateUserSchema, session: Session = Depends(get_session)):
-    db_user = session.scalar(select(User).where((User.id == user_id)))
-
-    if not db_user:
-        raise HTTPException(detail='Usuário não encontrado.', status_code=HTTPStatus.NOT_FOUND)
+def update(
+    user_id: int, 
+    user: CreateUserSchema, 
+    session: Session = Depends(get_session),
+    current_user: User = Depends(get_current_user)
+):
+    if current_user.id != user_id:
+        raise HTTPException(
+            status_code=HTTPStatus.FORBIDDEN,
+            detail='Usuário não possui permissão para editar informações de outro usuário.'
+        )
 
     try:
-        db_user.username = user.username
-        db_user.password = get_password_hash(user.password)
-        db_user.email = user.email
+        current_user.username = user.username
+        current_user.password = get_password_hash(user.password)
+        current_user.email = user.email
         session.commit()
-        session.refresh(db_user)
+        session.refresh(current_user)
 
-        return db_user
+        return current_user
 
     except IntegrityError:
         raise HTTPException(
             status_code=HTTPStatus.CONFLICT,
-            detail='Username or Email already exists',
+            detail='Username ou Email já existe.',
         )
 
 
 @user_router.delete('/{user_id}', response_model=Message)
-def delete(user_id: int, session: Session = Depends(get_session)):
-    db_user = session.scalar(select(User).where(User.id == user_id))
-
-    if not db_user:
+def delete(
+    user_id: int, 
+    session: Session = Depends(get_session),
+    current_user: User = Depends(get_current_user)
+):
+    if current_user.id != user_id:
         raise HTTPException(
-            status_code=HTTPStatus.NOT_FOUND, detail='Usuário não encontrado.'
+            status_code=HTTPStatus.FORBIDDEN,
+            detail='Usuário não possui permissão para deletar outro usuário.'
         )
 
-    session.delete(db_user)
+    session.delete(current_user)
     session.commit()
 
     return {'message': 'Usuário apagado.'}
