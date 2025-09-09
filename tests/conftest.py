@@ -2,9 +2,10 @@ from contextlib import contextmanager
 from datetime import datetime
 
 import pytest
+import pytest_asyncio
 from fastapi.testclient import TestClient
-from sqlalchemy import StaticPool, create_engine, event
-from sqlalchemy.orm import Session
+from sqlalchemy import StaticPool, event
+from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine
 
 from database import get_session
 from main import app
@@ -31,26 +32,29 @@ def client(session):
     app.dependency_overrides.clear()
 
 
-@pytest.fixture
-def session():
+@pytest_asyncio.fixture
+async def session():
     """
     Fornece uma sessão temporária do banco de dados em memória.
 
     Cria um engine SQLite em memória, todas as tabelas, fornece uma sessão ativa para testes e,
     ao final do teste, remove todas as tabelas, garantindo isolamento entre testes.
     """
-    engine = create_engine(
-        'sqlite:///:memory:',
+    engine = create_async_engine(
+        'sqlite+aiosqlite:///:memory:',
         connect_args={'check_same_thread': False},
         poolclass=StaticPool,  # executa nas mesmas threads
     )  # cria conexão
 
-    Base.metadata.create_all(engine)
+    # cria tabelas de forma sincrona, pois não faz sentido crias tabelas de forma assincrona.
+    async with engine.begin() as conn:
+        await conn.run_sync(Base.metadata.create_all)
 
-    with Session(engine) as session:  # cria uma sessão de troca entre o banco e o codigo
+    async with AsyncSession(engine, expire_on_commit=False) as session:
         yield session
 
-    Base.metadata.drop_all(engine)
+    async with engine.begin() as conn:
+        await conn.run_sync(Base.metadata.drop_all)
 
 
 @pytest.fixture
@@ -90,13 +94,13 @@ def _mock_db_time(*, model, time=datetime(2025, 9, 4)):
 
 
 # objetos no banco
-@pytest.fixture
-def user(session):
+@pytest_asyncio.fixture
+async def user(session: AsyncSession):
     password = 'beelover'
     user = User(username='bee', email='bee@test.com', password=get_password_hash(password))
     session.add(user)
-    session.commit()
-    session.refresh(user)
+    await session.commit()
+    await session.refresh(user)
 
     user.clean_password = password  # monkey patch
 

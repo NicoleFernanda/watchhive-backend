@@ -5,7 +5,7 @@ from schemas.user_schemas import GetUserSchema
 
 def test_create_user(client):
     response = client.post(
-        '/users',
+        '/users/',
         json={
             'username': 'alice',
             'email': 'alice@example.com',

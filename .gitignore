@@ -5,6 +5,7 @@ __pycache__/
 
 # project stuff
 database.db
+z_testes.py
 
 # C extensions
 *.so
