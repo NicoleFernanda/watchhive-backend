@@ -30,12 +30,12 @@ async def create(user: CreateUserSchema, session: Session):
         if db_user.username == user.username:
             raise HTTPException(
                 status_code=HTTPStatus.CONFLICT,
-                detail='Username already exists',
+                detail='Username em uso.',
             )
         elif db_user.email == user.email:
             raise HTTPException(
                 status_code=HTTPStatus.CONFLICT,
-                detail='Email already exists',
+                detail='Email em uso.',
             )
 
     db_user = User(

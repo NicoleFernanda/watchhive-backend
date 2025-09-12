@@ -3,6 +3,7 @@ from datetime import datetime
 
 import pytest
 import pytest_asyncio
+import factory
 from fastapi.testclient import TestClient
 from sqlalchemy import StaticPool, event
 from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine
@@ -97,12 +98,26 @@ def _mock_db_time(*, model, time=datetime(2025, 9, 4)):
 @pytest_asyncio.fixture
 async def user(session: AsyncSession):
     password = 'beelover'
-    user = User(username='bee', email='bee@test.com', password=get_password_hash(password))
+    user = UserFactory(password=get_password_hash(password))
     session.add(user)
     await session.commit()
     await session.refresh(user)
 
     user.clean_password = password  # monkey patch
+
+    return user
+
+
+@pytest_asyncio.fixture
+async def other_user(session):
+    password = 'beehater'
+    user = UserFactory(password=get_password_hash(password))
+
+    session.add(user)
+    await session.commit()
+    await session.refresh(user)
+
+    user.clean_password = password
 
     return user
 
@@ -120,3 +135,14 @@ def token(client, user):
 @pytest.fixture
 def settings():
     return Settings()
+
+
+class UserFactory(factory.Factory):
+    class Meta:
+        model = User # toda vez que chama, cria um novo usuario
+
+    username = factory.Sequence(lambda n: f'test{n}')
+    email = factory.LazyAttribute(lambda obj: f'{obj.username}@test.com')
+    password = factory.LazyAttribute(lambda obj: f'{obj.username}123')
+
+    
