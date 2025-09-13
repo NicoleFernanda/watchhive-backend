@@ -1,9 +1,9 @@
 from contextlib import contextmanager
 from datetime import datetime
 
+import factory
 import pytest
 import pytest_asyncio
-import factory
 from fastapi.testclient import TestClient
 from sqlalchemy import StaticPool, event
 from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine
@@ -11,6 +11,7 @@ from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine
 from database import get_session
 from main import app
 from models.base import Base
+from models.forum_post_model import ForumPost
 from models.user_model import User
 from security import get_password_hash
 from settings import Settings
@@ -121,6 +122,16 @@ async def other_user(session):
 
     return user
 
+# objetos no banco
+@pytest_asyncio.fixture
+async def forum_post(session: AsyncSession):
+    post = ForumPostFactory()
+    session.add(post)
+    await session.commit()
+    await session.refresh(post)
+
+    return post
+
 
 @pytest.fixture
 def token(client, user):
@@ -139,10 +150,17 @@ def settings():
 
 class UserFactory(factory.Factory):
     class Meta:
-        model = User # toda vez que chama, cria um novo usuario
+        model = User  # toda vez que chama, cria um novo usuario
 
     username = factory.Sequence(lambda n: f'test{n}')
     email = factory.LazyAttribute(lambda obj: f'{obj.username}@test.com')
     password = factory.LazyAttribute(lambda obj: f'{obj.username}123')
 
-    
+
+class ForumPostFactory(factory.Factory):
+    class Meta:
+        model = ForumPost  # toda vez que chama, cria um novo usuario
+
+    title = factory.Sequence(lambda n: f'title{n}')
+    content = factory.Sequence(lambda n: f'content{n}')
+    user_id = 1

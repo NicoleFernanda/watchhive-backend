@@ -1,7 +1,9 @@
 from datetime import datetime
 
 from sqlalchemy import func
-from sqlalchemy.orm import Mapped, mapped_column
+from sqlalchemy.orm import Mapped, mapped_column, relationship
+
+from models.forum_post_model import ForumPost
 
 from .base import Base
 
@@ -21,4 +23,10 @@ class User(Base):
 
     updated_at: Mapped[datetime] = mapped_column(
         init=False, server_default=func.now(), onupdate=func.now()
+    )
+
+    forum_posts: Mapped[list['ForumPost']] = relationship(
+        init=False,
+        cascade='all, delete-orphan',
+        lazy='selectin',
     )

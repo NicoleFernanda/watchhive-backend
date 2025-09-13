@@ -2,15 +2,17 @@ from http import HTTPStatus
 from typing import Annotated
 
 from fastapi import APIRouter, Depends, HTTPException, Query
-from sqlalchemy import select
-from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from controllers.user_controller import create_user, delete_user, get_all_users, get_user, update_user
 from database import get_session
+from exceptions.business_error import BusinessError
+from exceptions.permission_error import PermissionError
+from exceptions.record_not_found_error import RecordNotFoundError
 from models.user_model import User
 from schemas.commons_schemas import FilterPage, Message
 from schemas.user_schemas import CreateUserSchema, GetUserListSchema, GetUserSchema
-from security import get_current_user, get_password_hash
+from security import get_current_user
 
 user_router = APIRouter(prefix="/users", tags=['users'])
 Session = Annotated[AsyncSession, Depends(get_session)]
@@ -20,33 +22,15 @@ CurrentUser = Annotated[User, Depends(get_current_user)]
 @user_router.post('/', status_code=HTTPStatus.CREATED, response_model=GetUserSchema)
 async def create(user: CreateUserSchema, session: Session):
 
-    db_user = await session.scalar(
-        select(User).where(
-            (User.username == user.username) | (User.email == user.email)
+    try:
+        return await create_user(
+            username=user.username,
+            email=user.email,
+            password=user.password,
+            session=session,
         )
-    )
-
-    if db_user:
-        if db_user.username == user.username:
-            raise HTTPException(
-                status_code=HTTPStatus.CONFLICT,
-                detail='Username em uso.',
-            )
-        elif db_user.email == user.email:
-            raise HTTPException(
-                status_code=HTTPStatus.CONFLICT,
-                detail='Email em uso.',
-            )
-
-    db_user = User(
-        username=user.username, password=get_password_hash(user.password), email=user.email
-    )
-
-    session.add(db_user)
-    await session.commit()
-    await session.refresh(db_user)
-
-    return db_user
+    except BusinessError as u:
+        raise HTTPException(status_code=HTTPStatus.CONFLICT, detail=str(u))
 
 
 @user_router.get('/', status_code=HTTPStatus.OK, response_model=GetUserListSchema)
@@ -55,7 +39,12 @@ async def read_all(
     current_user: CurrentUser,
     filter_users: Annotated[FilterPage, Query()]
 ):
-    users = await session.scalars(select(User).limit(filter_users.limit).offset(filter_users.offset))
+
+    users = await get_all_users(
+        limit=filter_users.limit,
+        offset=filter_users.offset,
+        session=session
+    )
     return {"users": users}
 
 
@@ -66,26 +55,20 @@ async def update(
     session: Session,
     current_user: CurrentUser
 ):
-    if current_user.id != user_id:
-        raise HTTPException(
-            status_code=HTTPStatus.FORBIDDEN,
-            detail='Usuário não possui permissão para editar informações de outro usuário.'
-        )
 
     try:
-        current_user.username = user.username
-        current_user.password = get_password_hash(user.password)
-        current_user.email = user.email
-        await session.commit()
-        await session.refresh(current_user)
-
-        return current_user
-
-    except IntegrityError:
-        raise HTTPException(
-            status_code=HTTPStatus.CONFLICT,
-            detail='Username ou Email já existe.',
+        return await update_user(
+            current_user=current_user,
+            user_id=user_id,
+            username=user.username,
+            email=user.email,
+            password=user.password,
+            session=session,
         )
+    except PermissionError as p:
+        raise HTTPException(status_code=HTTPStatus.FORBIDDEN, detail=str(p))
+    except BusinessError as u:
+        raise HTTPException(status_code=HTTPStatus.CONFLICT, detail=str(u))
 
 
 @user_router.delete('/{user_id}', response_model=Message)
@@ -94,25 +77,29 @@ async def delete(
     session: Session,
     current_user: CurrentUser
 ):
-    if current_user.id != user_id:
-        raise HTTPException(
-            status_code=HTTPStatus.FORBIDDEN,
-            detail='Usuário não possui permissão para deletar outro usuário.'
+    try:
+        await delete_user(
+            current_user=current_user,
+            user_id=user_id,
+            session=session,
         )
-
-    session.delete(current_user)
-    await session.commit()
-
-    return {'message': 'Usuário apagado.'}
+        return {'message': 'Usuário apagado.'}
+    except BusinessError as u:
+        raise HTTPException(status_code=HTTPStatus.CONFLICT, detail=str(u))
+    except PermissionError as p:
+        raise HTTPException(status_code=HTTPStatus.FORBIDDEN, detail=str(p))
 
 
 @user_router.get('/{user_id}', response_model=GetUserSchema)
-async def read_user(user_id: int, session: Session):
-    db_user = await session.scalar(select(User).where((User.id == user_id)))
-
-    if not db_user:
-        raise HTTPException(
-            status_code=HTTPStatus.NOT_FOUND, detail='Usuário não encontrado.'
+async def read_user(
+    user_id: int,
+    session: Session,
+):
+    # TODO AAA: adicionar permissão para pesquisar usuários também kk
+    try:
+        return await get_user(
+            user_id=user_id,
+            session=session,
         )
-
-    return db_user
+    except RecordNotFoundError as u:
+        raise HTTPException(status_code=HTTPStatus.NOT_FOUND, detail=str(u))

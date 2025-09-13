@@ -1,5 +1,7 @@
 from http import HTTPStatus
+
 from freezegun import freeze_time
+
 
 def test_get_token(client, user):
     response = client.post(
@@ -25,7 +27,6 @@ def test_token_expired_after_time(client, user):
 
         assert response.status_code == HTTPStatus.OK
         assert 'access_token' in token
-
 
     with freeze_time('2025-12-31 12:31:00'):
         response = client.put(

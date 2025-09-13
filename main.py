@@ -4,7 +4,8 @@ import uvicorn
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
-from routers.auth_routers import auth_router
+from routers.auth_routes import auth_router
+from routers.forum_post_routes import forum_post_router
 from routers.user_routes import user_router
 from settings import settings
 
@@ -22,6 +23,7 @@ app.add_middleware(
 
 app.include_router(user_router)
 app.include_router(auth_router)
+app.include_router(forum_post_router)
 
 
 @app.get('/')
