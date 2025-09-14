@@ -62,7 +62,7 @@ def test_delete_forum_comment_from_post_creator(client, user, token, forum_comme
     assert response.json() == {'message': 'Comentário apagado.'}
 
 
-def test_delete_forum_post_forbidden(client, other_user, token, forum_post, forum_comment):
+def test_delete_forum_comment_forbidden(client, other_user, token, forum_post, forum_comment):
     forum_post.user_id = 777
     forum_comment.user_id = other_user.id
     forum_comment.post_id = forum_post.id
@@ -73,3 +73,12 @@ def test_delete_forum_post_forbidden(client, other_user, token, forum_post, foru
     )
     assert response.status_code == HTTPStatus.FORBIDDEN
     assert response.json() == {'detail': 'Você não pode apagar esse comentário.'}
+
+
+def test_delete_forum_comment_not_found(client, token, forum_post):
+    response = client.delete(
+        f'/forum_posts/{forum_post.id}/1',
+        headers={'Authorization': f'Bearer {token}'}
+    )
+    assert response.status_code == HTTPStatus.NOT_FOUND
+    assert response.json() == {'detail': 'Comentário não encontrado.'}

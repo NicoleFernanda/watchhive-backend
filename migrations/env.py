@@ -4,12 +4,14 @@ from models.user_model import User
 from models.forum_post_model import ForumPost
 from models.forum_comment_model import ForumComment
 from models.genre_model import Genre
+from models.media_model import Media
 from settings import settings 
 
 from logging.config import fileConfig
 
 from sqlalchemy.ext.asyncio import async_engine_from_config
 from sqlalchemy import pool
+
 
 from alembic import context
 

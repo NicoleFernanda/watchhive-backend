@@ -80,7 +80,5 @@ async def read(
             post_id=post_id,
             session=session,
         )
-    except PermissionError as p:
-        raise HTTPException(status_code=HTTPStatus.FORBIDDEN, detail=str(p))
     except RecordNotFoundError as u:
         raise HTTPException(status_code=HTTPStatus.NOT_FOUND, detail=str(u))
