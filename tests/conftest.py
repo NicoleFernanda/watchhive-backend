@@ -11,6 +11,7 @@ from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine
 from database import get_session
 from main import app
 from models.base import Base
+from models.forum_comment_model import ForumComment
 from models.forum_post_model import ForumPost
 from models.user_model import User
 from security import get_password_hash
@@ -122,7 +123,7 @@ async def other_user(session):
 
     return user
 
-# objetos no banco
+
 @pytest_asyncio.fixture
 async def forum_post(session: AsyncSession):
     post = ForumPostFactory()
@@ -131,6 +132,16 @@ async def forum_post(session: AsyncSession):
     await session.refresh(post)
 
     return post
+
+
+@pytest_asyncio.fixture
+async def forum_comment(session: AsyncSession):
+    comment = ForumCommentFactory()
+    session.add(comment)
+    await session.commit()
+    await session.refresh(comment)
+
+    return comment
 
 
 @pytest.fixture
@@ -159,8 +170,17 @@ class UserFactory(factory.Factory):
 
 class ForumPostFactory(factory.Factory):
     class Meta:
-        model = ForumPost  # toda vez que chama, cria um novo usuario
+        model = ForumPost  # toda vez que chama, cria um novo
 
     title = factory.Sequence(lambda n: f'title{n}')
     content = factory.Sequence(lambda n: f'content{n}')
     user_id = 1
+
+
+class ForumCommentFactory(factory.Factory):
+    class Meta:
+        model = ForumComment  # toda vez que chama, cria um novo
+
+    content = factory.Sequence(lambda n: f'content{n}')
+    user_id = 2
+    forum_post_id = 1

@@ -84,8 +84,6 @@ async def delete(
             session=session,
         )
         return {'message': 'Usuário apagado.'}
-    except BusinessError as u:
-        raise HTTPException(status_code=HTTPStatus.CONFLICT, detail=str(u))
     except PermissionError as p:
         raise HTTPException(status_code=HTTPStatus.FORBIDDEN, detail=str(p))
 

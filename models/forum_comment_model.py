@@ -17,7 +17,3 @@ class ForumComment(Base):
     created_at: Mapped[datetime] = mapped_column(
         init=False, server_default=func.now()
     )
-
-    updated_at: Mapped[datetime] = mapped_column(
-        init=False, server_default=func.now(), onupdate=func.now(), server_onupdate=func.now(),
-    )

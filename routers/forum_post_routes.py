@@ -4,13 +4,13 @@ from typing import Annotated
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from controllers.forum_post_controller import create_forum_post, delete_forum_post, update_forum_post
+from controllers.forum_post_controller import create_forum_post, delete_forum_post, read_forum_post, update_forum_post
 from database import get_session
 from exceptions.permission_error import PermissionError
 from exceptions.record_not_found_error import RecordNotFoundError
 from models.user_model import User
 from schemas.commons_schemas import FilterPage, Message
-from schemas.forum_post_schemas import CreateForumPostSchema, GetForumPostSchema
+from schemas.forum_schemas import CreateForumPostSchema, GetForumPostSchema
 from security import get_current_user
 
 forum_post_router = APIRouter(prefix="/forum_posts", tags=['forum_posts'])
@@ -68,4 +68,20 @@ async def delete(
     except RecordNotFoundError as u:
         raise HTTPException(status_code=HTTPStatus.NOT_FOUND, detail=str(u))
 
+
+@forum_post_router.get('/{post_id}', response_model=GetForumPostSchema)
+async def read(
+    post_id: int,
+    session: Session,
+    current_user: CurrentUser
+):
+    try:
+        return await read_forum_post(
+            post_id=post_id,
+            session=session,
+        )
+    except PermissionError as p:
+        raise HTTPException(status_code=HTTPStatus.FORBIDDEN, detail=str(p))
+    except RecordNotFoundError as u:
+        raise HTTPException(status_code=HTTPStatus.NOT_FOUND, detail=str(u))
 

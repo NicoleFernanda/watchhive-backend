@@ -28,4 +28,5 @@ async def test_create_post(session: AsyncSession, user, mock_db_time):
         'user_id': user.id,
         'created_at': time,
         'updated_at': time,
+        'comments': [],
     }

@@ -97,6 +97,17 @@ async def delete_forum_post(current_user_id: int, post_id: int, session: AsyncSe
     await session.commit()
 
 
+async def read_forum_post(post_id: int, session: AsyncSession):
+    """
+    Método retorna um post específico.
+
+    Args:
+        post_id (int): id do post em questão.
+        session (AsyncSession): sessão ativa do banco de dados.
+    """
+    return await existing_forum_post(post_id, session)
+
+
 async def existing_forum_post(id_forum_post: int, session: AsyncSession) -> ForumPost:
     """
     Método responsável por validar se o post existe e, caso seja verdade, o retorne.
@@ -106,7 +117,7 @@ async def existing_forum_post(id_forum_post: int, session: AsyncSession) -> Foru
         user_id_passed (int): id passado na url.
 
     Raises:
-        PermissionError: caso o usuário a ser utilizado em operações não seja o mesmo logado.
+        RecordNotFoundError: caso o usuário a ser utilizado em operações não seja o mesmo logado.
             No caso, quando alguém está tentando alterar o perfil de outra pessoa.
     """
     existing_post = await session.scalar(select(ForumPost).where((ForumPost.id == id_forum_post)))
@@ -115,5 +126,3 @@ async def existing_forum_post(id_forum_post: int, session: AsyncSession) -> Foru
         raise RecordNotFoundError('Post não encontrado no fórum WatchHive.')
 
     return existing_post
-
-

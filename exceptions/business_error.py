@@ -3,4 +3,4 @@ class BusinessError(Exception):
         super().__init__(message)
 
     def __str__(self):
-        return f"Opa! {self.args[0]}"
+        return f'Opa! {self.args[0]}'
