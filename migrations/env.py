@@ -3,6 +3,7 @@ from models.base import Base
 from models.user_model import User
 from models.forum_post_model import ForumPost
 from models.forum_comment_model import ForumComment
+from models.genre_model import Genre
 from settings import settings 
 
 from logging.config import fileConfig
