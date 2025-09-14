@@ -2,9 +2,11 @@ from datetime import datetime
 
 from sqlalchemy import ForeignKey, func
 from sqlalchemy.orm import Mapped, mapped_column, relationship
+
 from models.forum_comment_model import ForumComment
+
 from .base import Base
-        
+
 
 class ForumPost(Base):
     __tablename__ = 'forum_post'

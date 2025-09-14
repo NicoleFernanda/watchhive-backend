@@ -19,7 +19,7 @@ def test_create_forum_comment(client, user, token, forum_post):
 
 def test_create_forum_comment_post_not_found(client, token,):
     response = client.post(
-        f'/forum_posts/1',
+        '/forum_posts/1',
         json={
             'content': 'indico bela e a fera.'
         },

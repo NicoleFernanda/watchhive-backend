@@ -56,7 +56,7 @@ def test_update_forum_post_forbidden(client, other_user, token, forum_post):
 
 def test_update_forum_post_not_found(client, token):
     response = client.put(
-        f'/forum_posts/1',
+        '/forum_posts/1',
         json={
             'title': 'new title',
             'content': 'hihihi',
@@ -89,7 +89,7 @@ def test_delete_forum_post_forbidden(client, other_user, token, forum_post):
 
 def test_delete_forum_post_not_found(client, token):
     response = client.delete(
-        f'/forum_posts/1',
+        '/forum_posts/1',
         headers={'Authorization': f'Bearer {token}'},
     )
     assert response.status_code == HTTPStatus.NOT_FOUND
@@ -103,7 +103,7 @@ def test_read_post(client, token, forum_post, user):
         f'/forum_posts/{forum_post.id}',
         headers={'Authorization': f'Bearer {token}'},
     )
-    
+
     assert response.status_code == HTTPStatus.OK
     assert response.json() == {
         'id': forum_post.id,
@@ -116,7 +116,7 @@ def test_read_post(client, token, forum_post, user):
 
 def test_read_forum_post_not_found(client, token):
     response = client.get(
-        f'/forum_posts/1',
+        '/forum_posts/1',
         headers={'Authorization': f'Bearer {token}'},
     )
     assert response.status_code == HTTPStatus.NOT_FOUND

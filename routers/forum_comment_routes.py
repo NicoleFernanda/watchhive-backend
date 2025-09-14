@@ -9,7 +9,7 @@ from database import get_session
 from exceptions.permission_error import PermissionError
 from exceptions.record_not_found_error import RecordNotFoundError
 from models.user_model import User
-from schemas.commons_schemas import FilterPage, Message
+from schemas.commons_schemas import Message
 from schemas.forum_schemas import CreateForumCommentSchema, GetForumCommentSchema
 from security import get_current_user
 

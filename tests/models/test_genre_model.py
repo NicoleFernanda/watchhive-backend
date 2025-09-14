@@ -9,7 +9,7 @@ from models.genre_model import Genre
 
 @pytest.mark.asyncio
 async def test_create_genre(session: AsyncSession):
-    
+
     genre = Genre(id=1, name='Acao')
 
     session.add(genre)

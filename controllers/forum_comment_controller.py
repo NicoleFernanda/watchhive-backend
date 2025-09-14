@@ -2,11 +2,9 @@ from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from controllers.forum_post_controller import existing_forum_post
-from controllers.user_controller import validate_user
 from exceptions.permission_error import PermissionError
 from exceptions.record_not_found_error import RecordNotFoundError
 from models.forum_comment_model import ForumComment
-from models.forum_post_model import ForumPost
 
 
 async def create_forum_comment(id_post: str, content: str, user_id: id, session: AsyncSession) -> ForumComment:
@@ -26,7 +24,7 @@ async def create_forum_comment(id_post: str, content: str, user_id: id, session:
         comment (ForumComment): comentário adicionado ao post.
     """
     post = await existing_forum_post(id_post, session)
-    
+
     comment = ForumComment(
         content=content,
         user_id=user_id,
@@ -54,8 +52,9 @@ async def delete_forum_comment(post_id: int, comment_id, current_user_id: int, s
         await session.commit()
         await session.refresh(post)
         return
-    
+
     raise PermissionError('Você não pode apagar esse comentário.')
+
 
 async def existing_forum_comment(id_comment: int, session: AsyncSession):
     """
