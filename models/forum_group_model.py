@@ -3,13 +3,13 @@ from datetime import datetime
 from sqlalchemy import ForeignKey, func
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
-from models.forum_comment_model import ForumComment
+from models.forum_comment_model import ForumMessage
 
 from .base import Base
 
 
-class ForumPost(Base):
-    __tablename__ = 'forum_post'
+class ForumGroup(Base):
+    __tablename__ = 'forum_group'
 
     id: Mapped[int] = mapped_column(init=False, primary_key=True)
     title: Mapped[str]
@@ -24,7 +24,7 @@ class ForumPost(Base):
         init=False, server_default=func.now(), onupdate=func.now(), server_onupdate=func.now(),
     )
 
-    comments: Mapped[list['ForumComment']] = relationship(
+    messages: Mapped[list['ForumMessage']] = relationship(
         init=False,
         cascade='all, delete-orphan',
         lazy='selectin',

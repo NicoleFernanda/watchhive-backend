@@ -3,10 +3,10 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from controllers.user_controller import validate_user
 from exceptions.record_not_found_error import RecordNotFoundError
-from models.forum_post_model import ForumPost
+from models.forum_group_model import ForumGroup
 
 
-async def create_forum_post(title: str, content: str, user_id: id, session: AsyncSession) -> ForumPost:
+async def create_forum_post(title: str, content: str, user_id: id, session: AsyncSession) -> ForumGroup:
     """
     Método para criação de um post no fórum watchhive, pegando o usuário logado.
 
@@ -20,9 +20,9 @@ async def create_forum_post(title: str, content: str, user_id: id, session: Asyn
         BusinessError: caso o email ou username já estiverem em uso.
     
     Returns:
-        new_post (ForumPost): post adicionado no banco de dados.
+        new_post (ForumGroup): post adicionado no banco de dados.
     """
-    new_post = ForumPost(
+    new_post = ForumGroup(
         content=content,
         title=title,
         user_id=user_id
@@ -41,7 +41,7 @@ async def update_forum_post(
         content: str,
         logger_user_id: id,
         session: AsyncSession
-    ) -> ForumPost:
+    ) -> ForumGroup:
     """
     Método para criação de um post no fórum watchhive, pegando o usuário logado.
 
@@ -55,11 +55,11 @@ async def update_forum_post(
         BusinessError: caso o email ou username já estiverem em uso.
     
     Returns:
-        new_post (ForumPost): post adicionado no banco de dados.
+        new_post (ForumGroup): post adicionado no banco de dados.
     """
 
     # checa se o post existe
-    post = await existing_forum_post(forum_post_id, session)
+    post = await existing_forum_group(forum_post_id, session)
 
     # checa se o id do usuario do post é o mesmo que está logado
     validate_user(logger_user_id, post.user_id)
@@ -88,7 +88,7 @@ async def delete_forum_post(current_user_id: int, post_id: int, session: AsyncSe
             No caso, quando alguém está tentando alterar o perfil de outra pessoa.
     """
 
-    post = await existing_forum_post(post_id, session)
+    post = await existing_forum_group(post_id, session)
 
     validate_user(logger_user_id=current_user_id, user_id_passed=post.user_id)
 
@@ -104,12 +104,12 @@ async def read_forum_post(post_id: int, session: AsyncSession):
         post_id (int): id do post em questão.
         session (AsyncSession): sessão ativa do banco de dados.
     """
-    return await existing_forum_post(post_id, session)
+    return await existing_forum_group(post_id, session)
 
 
-async def existing_forum_post(id_forum_post: int, session: AsyncSession) -> ForumPost:
+async def existing_forum_group(id_forum_group: int, session: AsyncSession) -> ForumGroup:
     """
-    Método responsável por validar se o post existe e, caso seja verdade, o retorne.
+    Método responsável por validar se o grupo existe e, caso seja verdade, o retorne.
 
     Args:
         logger_user_id (int): id do usuário logado.
@@ -119,9 +119,9 @@ async def existing_forum_post(id_forum_post: int, session: AsyncSession) -> Foru
         RecordNotFoundError: caso o usuário a ser utilizado em operações não seja o mesmo logado.
             No caso, quando alguém está tentando alterar o perfil de outra pessoa.
     """
-    existing_post = await session.scalar(select(ForumPost).where((ForumPost.id == id_forum_post)))
+    existing_post = await session.scalar(select(ForumGroup).where((ForumGroup.id == id_forum_group)))
 
     if not existing_post:
-        raise RecordNotFoundError('Post não encontrado no fórum WatchHive.')
+        raise RecordNotFoundError('Grupo não encontrado no fórum WatchHive.')
 
     return existing_post

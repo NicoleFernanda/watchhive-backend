@@ -3,7 +3,7 @@ from datetime import datetime
 from sqlalchemy import func
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
-from models.forum_post_model import ForumPost
+from models.forum_group_model import ForumGroup
 
 from .base import Base
 
@@ -25,7 +25,7 @@ class User(Base):
         init=False, server_default=func.now(), onupdate=func.now()
     )
 
-    forum_posts: Mapped[list['ForumPost']] = relationship(
+    forum_groups: Mapped[list['ForumGroup']] = relationship(
         init=False,
         cascade='all, delete-orphan',
         lazy='selectin',

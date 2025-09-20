@@ -10,37 +10,37 @@ from exceptions.permission_error import PermissionError
 from exceptions.record_not_found_error import RecordNotFoundError
 from models.user_model import User
 from schemas.commons_schemas import Message
-from schemas.forum_schemas import CreateForumPostSchema, GetForumPostSchema
+from schemas.forum_schemas import CreateForumGroupSchema, GetForumGroupSchema
 from security import get_current_user
 
-forum_post_router = APIRouter(prefix="/forum_posts", tags=['forum_posts'])
+forum_group_router = APIRouter(prefix="/forum_groups", tags=['forum_groups'])
 Session = Annotated[AsyncSession, Depends(get_session)]
 CurrentUser = Annotated[User, Depends(get_current_user)]
 
 
-@forum_post_router.post('/', status_code=HTTPStatus.CREATED, response_model=GetForumPostSchema)
-async def create(post: CreateForumPostSchema, current_user: CurrentUser, session: Session):
+@forum_group_router.post('/', status_code=HTTPStatus.CREATED, response_model=GetForumGroupSchema)
+async def create(group: CreateForumGroupSchema, current_user: CurrentUser, session: Session):
 
     return await create_forum_post(
-        title=post.title,
-        content=post.content,
+        title=group.title,
+        content=group.content,
         user_id=current_user.id,
         session=session
     )
 
 
-@forum_post_router.put('/{forum_post_id}', status_code=HTTPStatus.OK, response_model=GetForumPostSchema)
+@forum_group_router.put('/{forum_group_id}', status_code=HTTPStatus.OK, response_model=GetForumGroupSchema)
 async def update(
-    forum_post_id: int,
-    forum_post: CreateForumPostSchema,
+    forum_group_id: int,
+    forum_group: CreateForumGroupSchema,
     session: Session,
     current_user: CurrentUser
 ):
     try:
         return await update_forum_post(
-            forum_post_id=forum_post_id,
-            title=forum_post.title,
-            content=forum_post.content,
+            forum_post_id=forum_group_id,
+            title=forum_group.title,
+            content=forum_group.content,
             logger_user_id=current_user.id,
             session=session,
         )
@@ -50,34 +50,34 @@ async def update(
         raise HTTPException(status_code=HTTPStatus.NOT_FOUND, detail=str(u))
 
 
-@forum_post_router.delete('/{post_id}', response_model=Message)
+@forum_group_router.delete('/{forum_group_id}', response_model=Message)
 async def delete(
-    post_id: int,
+    forum_group_id: int,
     session: Session,
     current_user: CurrentUser
 ):
     try:
         await delete_forum_post(
             current_user_id=current_user.id,
-            post_id=post_id,
+            post_id=forum_group_id,
             session=session,
         )
-        return {'message': 'Post apagado.'}
+        return {'message': 'Grupo apagado.'}
     except PermissionError as p:
         raise HTTPException(status_code=HTTPStatus.FORBIDDEN, detail=str(p))
     except RecordNotFoundError as u:
         raise HTTPException(status_code=HTTPStatus.NOT_FOUND, detail=str(u))
 
 
-@forum_post_router.get('/{post_id}', response_model=GetForumPostSchema)
+@forum_group_router.get('/{forum_group_id}', response_model=GetForumGroupSchema)
 async def read(
-    post_id: int,
+    forum_group_id: int,
     session: Session,
     current_user: CurrentUser
 ):
     try:
         return await read_forum_post(
-            post_id=post_id,
+            post_id=forum_group_id,
             session=session,
         )
     except RecordNotFoundError as u:

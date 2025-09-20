@@ -11,8 +11,8 @@ from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine
 from database import get_session
 from main import app
 from models.base import Base
-from models.forum_comment_model import ForumComment
-from models.forum_post_model import ForumPost
+from models.forum_comment_model import ForumMessage
+from models.forum_group_model import ForumGroup
 from models.user_model import User
 from security import get_password_hash
 from settings import Settings
@@ -125,8 +125,8 @@ async def other_user(session):
 
 
 @pytest_asyncio.fixture
-async def forum_post(session: AsyncSession):
-    post = ForumPostFactory()
+async def forum_group(session: AsyncSession):
+    post = ForumGroupFactory()
     session.add(post)
     await session.commit()
     await session.refresh(post)
@@ -135,8 +135,8 @@ async def forum_post(session: AsyncSession):
 
 
 @pytest_asyncio.fixture
-async def forum_comment(session: AsyncSession):
-    comment = ForumCommentFactory()
+async def forum_message(session: AsyncSession):
+    comment = ForumMessageFactory()
     session.add(comment)
     await session.commit()
     await session.refresh(comment)
@@ -168,19 +168,19 @@ class UserFactory(factory.Factory):
     password = factory.LazyAttribute(lambda obj: f'{obj.username}123')
 
 
-class ForumPostFactory(factory.Factory):
+class ForumGroupFactory(factory.Factory):
     class Meta:
-        model = ForumPost  # toda vez que chama, cria um novo
+        model = ForumGroup  # toda vez que chama, cria um novo
 
     title = factory.Sequence(lambda n: f'title{n}')
     content = factory.Sequence(lambda n: f'content{n}')
     user_id = 1
 
 
-class ForumCommentFactory(factory.Factory):
+class ForumMessageFactory(factory.Factory):
     class Meta:
-        model = ForumComment  # toda vez que chama, cria um novo
+        model = ForumMessage  # toda vez que chama, cria um novo
 
     content = factory.Sequence(lambda n: f'content{n}')
     user_id = 2
-    forum_post_id = 1
+    forum_group_id = 1

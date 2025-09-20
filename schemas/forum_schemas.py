@@ -2,30 +2,30 @@ from pydantic import BaseModel
 
 
 # comments
-class CreateForumCommentSchema(BaseModel):
+class CreateForumMessageSchema(BaseModel):
     content: str
 
 
-class GetForumCommentSchema(BaseModel):
+class GetForumMessageSchema(BaseModel):
     id: int
     user_id: int
     content: str
 
 
 # posts
-class CreateForumPostSchema(BaseModel):
+class CreateForumGroupSchema(BaseModel):
     title: str
     content: str
 
 
-class GetForumPostSchema(CreateForumPostSchema):
+class GetForumGroupSchema(CreateForumGroupSchema):
     id: int
     user_id: int
-    comments: list[GetForumCommentSchema]
+    messages: list[GetForumMessageSchema]
 
     class Config:
         from_attributes = True
 
 
-class GetForumPostListSchema(BaseModel):
-    posts: list[GetForumPostSchema]
+class GetForumGroupListSchema(BaseModel):
+    groups: list[GetForumGroupSchema]

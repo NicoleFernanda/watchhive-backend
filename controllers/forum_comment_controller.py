@@ -1,18 +1,18 @@
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from controllers.forum_post_controller import existing_forum_post
+from controllers.forum_post_controller import existing_forum_group
 from exceptions.permission_error import PermissionError
 from exceptions.record_not_found_error import RecordNotFoundError
-from models.forum_comment_model import ForumComment
+from models.forum_comment_model import ForumMessage
 
 
-async def create_forum_comment(id_post: str, content: str, user_id: id, session: AsyncSession) -> ForumComment:
+async def create_forum_message(id_forum_post: str, content: str, user_id: id, session: AsyncSession) -> ForumMessage:
     """
-    Método para criação de um comentário de um post no fórum watchhive, pegando o usuário logado.
+    Método para criação de um mensagem em um fórum watchhive, pegando o usuário logado.
 
     Args:
-        id_post (int): id do post a ser comentado.
+        id_forum_post (int): id do forúm group a ser comentado.
         content (str): conteúdo do post.
         user_id (str): id do usuário logado.
         session (AsyncSession): sessão do banco de dados ativa.
@@ -21,14 +21,14 @@ async def create_forum_comment(id_post: str, content: str, user_id: id, session:
         BusinessError: caso o email ou username já estiverem em uso.
     
     Returns:
-        comment (ForumComment): comentário adicionado ao post.
+        comment (ForumComment): mensagem adicionado ao post.
     """
-    post = await existing_forum_post(id_post, session)
+    group = await existing_forum_group(id_forum_post, session)
 
-    comment = ForumComment(
+    comment = ForumMessage(
         content=content,
         user_id=user_id,
-        forum_post_id=post.id
+        forum_group_id=group.id
     )
 
     session.add(comment)
@@ -38,40 +38,40 @@ async def create_forum_comment(id_post: str, content: str, user_id: id, session:
     return comment
 
 
-async def delete_forum_comment(post_id: int, comment_id, current_user_id: int, session: AsyncSession):
+async def delete_forum_message(post_id: int, comment_id, current_user_id: int, session: AsyncSession):
     """
-    Método responsável para apagar um comentário feito dentro de um post.
-    Quem pode apagar é o próprio criador do comentário OU o dono do post que foi comentaedo.
+    Método responsável para apagar um mensagem feito dentro de um fórum.
+    Quem pode apagar é o próprio criador da mensagem OU o dono do fórum que foi comentaedo.
     """
 
-    post = await existing_forum_post(post_id, session)
-    comment = await existing_forum_comment(comment_id, session)
+    group = await existing_forum_group(post_id, session)
+    comment = await existing_forum_message(comment_id, session)
 
-    if post.user_id == current_user_id or comment.user_id == current_user_id:
+    if group.user_id == current_user_id or comment.user_id == current_user_id:
         await session.delete(comment)
         await session.commit()
-        await session.refresh(post)
+        await session.refresh(group)
         return
 
-    raise PermissionError('Você não pode apagar esse comentário.')
+    raise PermissionError('Você não pode apagar essa mensagem.')
 
 
-async def existing_forum_comment(id_comment: int, session: AsyncSession):
+async def existing_forum_message(id_comment: int, session: AsyncSession):
     """
-    Verifica a existência do comentário em questão. Caso exista, seu objeto 
+    Verifica a existência da mensagem em questão. Caso exista, seu objeto 
     será retornado. Caso conterário, uma exceção será lançada.
 
     Args:
-        id_comment (int): id do comentário.
+        id_comment (int): id da mensagem.
         session (AsyncSession): sessão ativa do banco de dados.
 
     Raises:
-        RecordNotFound: caso o comentário não exista.
+        RecordNotFound: caso a mensagem não exista.
     """
 
-    existing_comment = await session.scalar(select(ForumComment).where((ForumComment.id == id_comment)))
+    existing_comment = await session.scalar(select(ForumMessage).where((ForumMessage.id == id_comment)))
 
     if not existing_comment:
-        raise RecordNotFoundError('Comentário não encontrado.')
+        raise RecordNotFoundError('Mensagem não encontrada.')
 
     return existing_comment
