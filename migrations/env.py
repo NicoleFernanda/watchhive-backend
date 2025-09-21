@@ -1,6 +1,7 @@
 import asyncio
 from models.base import Base
 from models.user_model import User
+from models.forum_participant_model import ForumParticipant
 from models.forum_group_model import ForumGroup
 from models.forum_comment_model import ForumMessage
 from models.media_model import Genre, Media

@@ -1,10 +1,11 @@
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from controllers.forum_post_controller import existing_forum_group
+from controllers.forum_group_controller import existing_forum_group
 from exceptions.permission_error import PermissionError
 from exceptions.record_not_found_error import RecordNotFoundError
 from models.forum_comment_model import ForumMessage
+from models.forum_participant_model import ForumParticipant
 
 
 async def create_forum_message(id_forum_post: str, content: str, user_id: id, session: AsyncSession) -> ForumMessage:
@@ -24,6 +25,11 @@ async def create_forum_message(id_forum_post: str, content: str, user_id: id, se
         comment (ForumComment): mensagem adicionado ao post.
     """
     group = await existing_forum_group(id_forum_post, session)
+
+    participant = await session.scalar(select(ForumParticipant).where(ForumParticipant.user_id == user_id))
+
+    if not participant:
+        raise PermissionError('Você não faz parte do grupo.')
 
     comment = ForumMessage(
         content=content,

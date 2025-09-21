@@ -25,6 +25,7 @@ class Genre(Base):
         secondary=media_genre, back_populates="genres"
     )
 
+
 class Media(Base):
     __tablename__ = "media"
 

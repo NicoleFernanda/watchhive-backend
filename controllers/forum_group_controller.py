@@ -4,11 +4,13 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from controllers.user_controller import validate_user
 from exceptions.record_not_found_error import RecordNotFoundError
 from models.forum_group_model import ForumGroup
+from models.forum_participant_model import ForumParticipant
 
 
-async def create_forum_post(title: str, content: str, user_id: id, session: AsyncSession) -> ForumGroup:
+async def create_forum_group(title: str, content: str, user_id: id, session: AsyncSession) -> ForumGroup:
     """
-    Método para criação de um post no fórum watchhive, pegando o usuário logado.
+    Método para criação de um grupo no fórum watchhive, pegando o usuário logado.
+    Assim que o grupo for criado, o criador dele é adicionado automaticamente aos participantes.
 
     Args:
         title (str): username do usuário.
@@ -20,22 +22,31 @@ async def create_forum_post(title: str, content: str, user_id: id, session: Asyn
         BusinessError: caso o email ou username já estiverem em uso.
     
     Returns:
-        new_post (ForumGroup): post adicionado no banco de dados.
+        new_forum_group (ForumGroup): grupo adicionado no banco de dados.
     """
-    new_post = ForumGroup(
+    new_forum_group = ForumGroup(
         content=content,
         title=title,
         user_id=user_id
     )
 
-    session.add(new_post)
+    session.add(new_forum_group)
     await session.commit()
-    await session.refresh(new_post)
+    await session.refresh(new_forum_group)
 
-    return new_post
+    new_participant = ForumParticipant(
+        user_id=user_id,
+        forum_group_id=new_forum_group.id
+    )
+
+    session.add(new_participant)
+    await session.commit()
+    await session.refresh(new_participant)
+
+    return new_forum_group
 
 
-async def update_forum_post(
+async def update_forum_group(
         forum_post_id: id,
         title: str,
         content: str,
@@ -55,7 +66,7 @@ async def update_forum_post(
         BusinessError: caso o email ou username já estiverem em uso.
     
     Returns:
-        new_post (ForumGroup): post adicionado no banco de dados.
+        post (ForumGroup): grupo atualizado no banco de dados.
     """
 
     # checa se o post existe
@@ -74,9 +85,9 @@ async def update_forum_post(
     return post
 
 
-async def delete_forum_post(current_user_id: int, post_id: int, session: AsyncSession):
+async def delete_forum_group(current_user_id: int, post_id: int, session: AsyncSession):
     """
-    Apaga um usuário do banco de dados.
+    Apaga um grupo do banco de dados.
 
     Args:
         current_user(User): usuário logado.
@@ -96,7 +107,7 @@ async def delete_forum_post(current_user_id: int, post_id: int, session: AsyncSe
     await session.commit()
 
 
-async def read_forum_post(post_id: int, session: AsyncSession):
+async def read_forum_group(post_id: int, session: AsyncSession):
     """
     Método retorna um post específico.
 

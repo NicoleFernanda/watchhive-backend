@@ -13,6 +13,7 @@ from main import app
 from models.base import Base
 from models.forum_comment_model import ForumMessage
 from models.forum_group_model import ForumGroup
+from models.forum_participant_model import ForumParticipant
 from models.user_model import User
 from security import get_password_hash
 from settings import Settings
@@ -135,6 +136,17 @@ async def forum_group(session: AsyncSession):
 
 
 @pytest_asyncio.fixture
+async def forum_participant(session: AsyncSession, forum_group):
+    participant = ForumParticipantFactory()
+    session.add(participant)
+    await session.commit()
+    await session.refresh(participant)
+    await session.refresh(forum_group)
+
+    return participant
+
+
+@pytest_asyncio.fixture
 async def forum_message(session: AsyncSession):
     comment = ForumMessageFactory()
     session.add(comment)
@@ -174,6 +186,14 @@ class ForumGroupFactory(factory.Factory):
 
     title = factory.Sequence(lambda n: f'title{n}')
     content = factory.Sequence(lambda n: f'content{n}')
+    user_id = 1
+
+
+class ForumParticipantFactory(factory.Factory):
+    class Meta:
+        model = ForumParticipant  # toda vez que chama, cria um novo
+
+    forum_group_id = 1
     user_id = 1
 
 

@@ -20,5 +20,5 @@ async def test_create_genre(session: AsyncSession):
     assert asdict(genre) == {
         'id': 1,
         'name': 'Acao',
-        'medias':[]
+        'medias': []
     }

@@ -30,6 +30,8 @@ async def create(id_forum_group: int, comment: CreateForumMessageSchema, current
         )
     except RecordNotFoundError as u:
         raise HTTPException(status_code=HTTPStatus.NOT_FOUND, detail=str(u))
+    except PermissionError as p:
+        raise HTTPException(status_code=HTTPStatus.FORBIDDEN, detail=str(p))
 
 
 @forum_message_router.delete('/{id_forum_group}/{id_message}', response_model=Message)

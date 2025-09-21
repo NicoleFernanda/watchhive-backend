@@ -1,7 +1,7 @@
 from http import HTTPStatus
 
 
-def test_create_forum_message(client, user, token, forum_group):
+def test_create_forum_message_participant(client, user, token, forum_group, forum_participant):
     response = client.post(
         f'/forum_groups/{forum_group.id}',
         json={
@@ -17,6 +17,19 @@ def test_create_forum_message(client, user, token, forum_group):
     }
 
 
+def test_create_forum_message_not_participant(client, token, forum_group, other_user):
+    forum_group.user_id = other_user.id
+    response = client.post(
+        f'/forum_groups/{forum_group.id}',
+        json={
+            'content': 'indico bela e a fera.'
+        },
+        headers={'Authorization': f'Bearer {token}'}
+    )
+    assert response.status_code == HTTPStatus.FORBIDDEN
+    assert response.json() == {'detail': 'Você não faz parte do grupo.'}
+
+
 def test_create_forum_message_post_not_found(client, token,):
     response = client.post(
         '/forum_groups/1',
@@ -29,8 +42,7 @@ def test_create_forum_message_post_not_found(client, token,):
     assert response.json() == {'detail': 'Grupo não encontrado no fórum WatchHive.'}
 
 
-def test_delete_forum_message_from_comment_creator(client, other_user, token, forum_group):
-    forum_group.user_id = other_user.id
+def test_delete_forum_message_from_message_creator(client, user, token, forum_group, forum_participant):
     response = client.post(
         f'/forum_groups/{forum_group.id}',
         json={

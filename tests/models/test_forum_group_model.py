@@ -29,4 +29,5 @@ async def test_create_group(session: AsyncSession, user, mock_db_time):
         'created_at': time,
         'updated_at': time,
         'messages': [],
+        'participants': [                                         ]
     }

@@ -4,7 +4,7 @@ from typing import Annotated
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from controllers.forum_post_controller import create_forum_post, delete_forum_post, read_forum_post, update_forum_post
+from controllers.forum_group_controller import create_forum_group, delete_forum_group, read_forum_group, update_forum_group
 from database import get_session
 from exceptions.permission_error import PermissionError
 from exceptions.record_not_found_error import RecordNotFoundError
@@ -21,7 +21,7 @@ CurrentUser = Annotated[User, Depends(get_current_user)]
 @forum_group_router.post('/', status_code=HTTPStatus.CREATED, response_model=GetForumGroupSchema)
 async def create(group: CreateForumGroupSchema, current_user: CurrentUser, session: Session):
 
-    return await create_forum_post(
+    return await create_forum_group(
         title=group.title,
         content=group.content,
         user_id=current_user.id,
@@ -37,7 +37,7 @@ async def update(
     current_user: CurrentUser
 ):
     try:
-        return await update_forum_post(
+        return await update_forum_group(
             forum_post_id=forum_group_id,
             title=forum_group.title,
             content=forum_group.content,
@@ -57,7 +57,7 @@ async def delete(
     current_user: CurrentUser
 ):
     try:
-        await delete_forum_post(
+        await delete_forum_group(
             current_user_id=current_user.id,
             post_id=forum_group_id,
             session=session,
@@ -76,7 +76,7 @@ async def read(
     current_user: CurrentUser
 ):
     try:
-        return await read_forum_post(
+        return await read_forum_group(
             post_id=forum_group_id,
             session=session,
         )

@@ -40,7 +40,7 @@ async def test_create_media(session: AsyncSession, mock_db_time):
         'id_imdb': 2,
         'id_themoviedb': 2,
         'media_type': 'filme',
-        'original_language': 'en', 
+        'original_language': 'en',
         'original_title': 'kung fu panda 2',
         'popularity': 1,
         'poster_url': '',

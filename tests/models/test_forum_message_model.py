@@ -49,4 +49,5 @@ async def test_create_messages(session: AsyncSession, user, mock_db_time, other_
                 'created_at': time,
             }
         ],
+        "participants": []
     }
