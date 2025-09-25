@@ -30,9 +30,9 @@ async def test_create_media(session: AsyncSession, mock_db_time):
     session.add(media)
     await session.commit()
 
-    user = await session.scalar(select(Media).options(selectinload(Media.genres)).where(Media.id == 1))
+    created_media = await session.scalar(select(Media).options(selectinload(Media.genres)).where(Media.id == 1))
 
-    assert asdict(user) == {
+    assert asdict(created_media) == {
         'id': 1,
         'adult': False,
         'description': 'po vai atrás do ganso',
@@ -47,5 +47,6 @@ async def test_create_media(session: AsyncSession, mock_db_time):
         'title': 'kung fu panda 2',
         'vote_average': 2,
         'vote_count': 3,
-        "genres": []
+        "genres": [],
+        "comments": []
     }

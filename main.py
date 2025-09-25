@@ -6,6 +6,8 @@ from fastapi.middleware.cors import CORSMiddleware
 
 from routers.auth_routes import auth_router
 from routers.forum_group_routes import forum_group_router
+from routers.media_comment_routes import media_comment_router
+from routers.media_routes import media_router
 from routers.forum_message_routes import forum_message_router
 from routers.user_routes import user_router
 from settings import settings
@@ -24,6 +26,8 @@ app.add_middleware(
 
 app.include_router(user_router)
 app.include_router(auth_router)
+app.include_router(media_router)
+app.include_router(media_comment_router)
 app.include_router(forum_group_router)
 app.include_router(forum_message_router)
 

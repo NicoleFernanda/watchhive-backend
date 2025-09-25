@@ -4,6 +4,8 @@ from typing import List
 from sqlalchemy import Column, ForeignKey, Table
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
+from models.media_comment_model import MediaComment
+
 from .base import Base
 
 # tabela de associação
@@ -49,4 +51,10 @@ class Media(Base):
 
     genres: Mapped[List["Genre"]] = relationship(
         secondary=media_genre, back_populates="medias", init=False
+    )
+
+    comments: Mapped[list['MediaComment']] = relationship(
+        init=False,
+        cascade='all, delete-orphan',
+        lazy='selectin',
     )
