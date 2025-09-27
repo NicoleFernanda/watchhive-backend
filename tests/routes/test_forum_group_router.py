@@ -16,7 +16,8 @@ def test_create_forum_group(client, user, token):
         'content': 'indicação de filme para eu assistir com o namorado.',
         'id': 1,
         'user_id': user.id,
-        'messages': []
+        'messages': [],
+        'participants': [],
     }
 
 
@@ -37,6 +38,7 @@ def test_update_forum_group(client, user, token, forum_group):
         'user_id': user.id,
         'id': forum_group.id,
         'messages': [],
+        'participants': [],
     }
 
 
@@ -111,6 +113,7 @@ def test_read_post(client, token, forum_group, user):
         'content': forum_group.content,
         'user_id': user.id,
         'messages': [],
+        'participants': [],
     }
 
 

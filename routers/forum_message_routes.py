@@ -4,7 +4,7 @@ from typing import Annotated
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from controllers.forum_comment_controller import create_forum_message, delete_forum_message
+from controllers.forum_comment_controller import create_forum_participant, delete_forum_message
 from database import get_session
 from exceptions.permission_error import PermissionError
 from exceptions.record_not_found_error import RecordNotFoundError
@@ -18,11 +18,11 @@ Session = Annotated[AsyncSession, Depends(get_session)]
 CurrentUser = Annotated[User, Depends(get_current_user)]
 
 
-@forum_message_router.post('/{id_forum_group}', status_code=HTTPStatus.CREATED, response_model=GetForumMessageSchema)
+@forum_message_router.post('/{id_forum_group}/messages', status_code=HTTPStatus.CREATED, response_model=GetForumMessageSchema)
 async def create(id_forum_group: int, comment: CreateForumMessageSchema, current_user: CurrentUser, session: Session):
 
     try:
-        return await create_forum_message(
+        return await create_forum_participant(
             id_forum_post=id_forum_group,
             content=comment.content,
             user_id=current_user.id,
@@ -34,7 +34,7 @@ async def create(id_forum_group: int, comment: CreateForumMessageSchema, current
         raise HTTPException(status_code=HTTPStatus.FORBIDDEN, detail=str(p))
 
 
-@forum_message_router.delete('/{id_forum_group}/{id_message}', response_model=Message)
+@forum_message_router.delete('/{id_forum_group}/messages/{id_message}', response_model=Message)
 async def delete(id_forum_group: int, id_message: int, current_user: CurrentUser, session: Session):
     try:
         await delete_forum_message(

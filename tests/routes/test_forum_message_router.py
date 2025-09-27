@@ -3,7 +3,7 @@ from http import HTTPStatus
 
 def test_create_forum_message_participant(client, user, token, forum_group, forum_participant):
     response = client.post(
-        f'/forum_groups/{forum_group.id}',
+        f'/forum_groups/{forum_group.id}/messages',
         json={
             'content': 'indico bela e a fera.'
         },
@@ -20,7 +20,7 @@ def test_create_forum_message_participant(client, user, token, forum_group, foru
 def test_create_forum_message_not_participant(client, token, forum_group, other_user):
     forum_group.user_id = other_user.id
     response = client.post(
-        f'/forum_groups/{forum_group.id}',
+        f'/forum_groups/{forum_group.id}/messages',
         json={
             'content': 'indico bela e a fera.'
         },
@@ -32,7 +32,7 @@ def test_create_forum_message_not_participant(client, token, forum_group, other_
 
 def test_create_forum_message_post_not_found(client, token,):
     response = client.post(
-        '/forum_groups/1',
+        '/forum_groups/1/messages',
         json={
             'content': 'indico bela e a fera.'
         },
@@ -44,7 +44,7 @@ def test_create_forum_message_post_not_found(client, token,):
 
 def test_delete_forum_message_from_message_creator(client, user, token, forum_group, forum_participant):
     response = client.post(
-        f'/forum_groups/{forum_group.id}',
+        f'/forum_groups/{forum_group.id}/messages',
         json={
             'content': 'indico bela e a fera.'
         },
@@ -54,7 +54,7 @@ def test_delete_forum_message_from_message_creator(client, user, token, forum_gr
     assert response.status_code == HTTPStatus.CREATED
 
     response = client.delete(
-        f'/forum_groups/{forum_group.id}/1',
+        f'/forum_groups/{forum_group.id}/messages/1',
         headers={'Authorization': f'Bearer {token}'},
     )
     assert response.status_code == HTTPStatus.OK
@@ -67,7 +67,7 @@ def test_delete_forum_message_from_post_creator(client, user, token, forum_messa
     forum_message.forum_group_id = forum_group.id
 
     response = client.delete(
-        f'/forum_groups/{forum_group.id}/{forum_message.id}',
+        f'/forum_groups/{forum_group.id}/messages/{forum_message.id}',
         headers={'Authorization': f'Bearer {token}'},
     )
     assert response.status_code == HTTPStatus.OK
@@ -80,7 +80,7 @@ def test_delete_forum_message_forbidden(client, other_user, token, forum_group, 
     forum_message.forum_group_id = forum_group.id
 
     response = client.delete(
-        f'/forum_groups/{forum_group.id}/{forum_message.id}',
+        f'/forum_groups/{forum_group.id}/messages/{forum_message.id}',
         headers={'Authorization': f'Bearer {token}'},
     )
     assert response.status_code == HTTPStatus.FORBIDDEN
@@ -89,7 +89,7 @@ def test_delete_forum_message_forbidden(client, other_user, token, forum_group, 
 
 def test_delete_forum_message_not_found(client, token, forum_group):
     response = client.delete(
-        f'/forum_groups/{forum_group.id}/1',
+        f'/forum_groups/{forum_group.id}/messages/1',
         headers={'Authorization': f'Bearer {token}'}
     )
     assert response.status_code == HTTPStatus.NOT_FOUND

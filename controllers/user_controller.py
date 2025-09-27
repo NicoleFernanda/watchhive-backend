@@ -141,10 +141,7 @@ async def get_user(user_id: int, session: AsyncSession):
         user (User): usuário retornado.
     """
 
-    db_user = await session.scalar(select(User).where((User.id == user_id)))
-
-    if not db_user:
-        raise RecordNotFoundError('Usuário não encontrado.')
+    db_user = await existing_user(user_id, session)
 
     return db_user
 
@@ -164,3 +161,23 @@ def validate_user(logger_user_id: int, user_id_passed: int):
     """
     if logger_user_id != user_id_passed:
         raise PermissionError('Usuário não possui permissão para editar informações de outro usuário.')
+
+
+async def existing_user(user_id: int, session):
+    """
+    Método responsável por retornar um usuário ativo da plataforma.
+
+    Args:
+        session (AsyncSession): sessão ativa do banco
+        user_id (int): usuário.
+
+    Raises:
+        RecordNotFoundError: caso o usuário não exista
+    """
+
+    user = await session.scalar(select(User).where((User.id == user_id)))
+
+    if not user:
+        raise RecordNotFoundError('Usuário não encontrado.')
+    
+    return user

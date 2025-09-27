@@ -12,6 +12,15 @@ class GetForumMessageSchema(BaseModel):
     content: str
 
 
+# participants
+class CreateForumParticipantSchema(BaseModel):
+    user_id: int
+
+
+class GetForumParticipantSchema(BaseModel):
+    user_id: int
+
+
 # posts
 class CreateForumGroupSchema(BaseModel):
     title: str
@@ -22,6 +31,7 @@ class GetForumGroupSchema(CreateForumGroupSchema):
     id: int
     user_id: int
     messages: list[GetForumMessageSchema]
+    participants: list[GetForumParticipantSchema]
 
     class Config:
         from_attributes = True
