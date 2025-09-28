@@ -6,6 +6,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from controllers.review_controller import create_review
 from database import get_session
+from exceptions.business_error import BusinessError
 from exceptions.permission_error import PermissionError
 from exceptions.record_not_found_error import RecordNotFoundError
 from models.user_model import User
@@ -30,8 +31,8 @@ async def create(id_media: int, review: CreateReviewSchema, current_user: Curren
         )
     except RecordNotFoundError as u:
         raise HTTPException(status_code=HTTPStatus.NOT_FOUND, detail=str(u))
-    except PermissionError as p:
-        raise HTTPException(status_code=HTTPStatus.FORBIDDEN, detail=str(p))
+    except BusinessError as e:
+        raise HTTPException(status_code=HTTPStatus.CONFLICT, detail=str(e))
 
 
 # @forum_message_router.delete('/{id_forum_group}/messages/{id_message}', response_model=Message)
