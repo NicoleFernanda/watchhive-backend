@@ -31,7 +31,14 @@ async def test_create_media_comment(session: AsyncSession, mock_db_time, user):
         session.add(media)
         await session.commit()
 
-    created_media = await session.scalar(select(Media).options(selectinload(Media.genres)).where(Media.id == 1))
+    created_media = await session.scalar(
+        select(Media)
+        .options(
+            selectinload(Media.genres),
+            selectinload(Media.comments)
+        )
+        .where(Media.id == 1)
+    )
 
     with mock_db_time(model=MediaComment) as time:
         comment = MediaComment(
@@ -42,7 +49,16 @@ async def test_create_media_comment(session: AsyncSession, mock_db_time, user):
 
         session.add(comment)
         await session.commit()
-        session.refresh(media)
+        await session.refresh(comment)
+        
+        media = await session.scalar(
+            select(Media)
+            .options(
+                selectinload(Media.genres),
+                selectinload(Media.comments),
+            )
+            .where(Media.id == created_media.id)
+        )
 
         assert asdict(media) == {
             'id': 1,
@@ -60,5 +76,6 @@ async def test_create_media_comment(session: AsyncSession, mock_db_time, user):
             'vote_average': 2,
             'vote_count': 3,
             "genres": [],
-            "comments": []
+            "comments": [],
+            "reviews": []
         }

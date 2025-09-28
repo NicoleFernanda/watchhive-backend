@@ -18,7 +18,7 @@ Session = Annotated[AsyncSession, Depends(get_session)]
 CurrentUser = Annotated[User, Depends(get_current_user)]
 
 
-@media_comment_router.post('/{id_media}', status_code=HTTPStatus.CREATED, response_model=GetMediaCommentSchema)
+@media_comment_router.post('/{id_media}/comment', status_code=HTTPStatus.CREATED, response_model=GetMediaCommentSchema)
 async def create(id_media: int, comment: CreateMediaCommentSchema, current_user: CurrentUser, session: Session):
 
     try:
@@ -32,7 +32,7 @@ async def create(id_media: int, comment: CreateMediaCommentSchema, current_user:
         raise HTTPException(status_code=HTTPStatus.NOT_FOUND, detail=str(u))
 
 
-@media_comment_router.delete('/{id_media}/{id_comment}', response_model=Message)
+@media_comment_router.delete('/{id_media}/comment/{id_comment}', response_model=Message)
 async def delete(id_media: int, id_comment: int, current_user: CurrentUser, session: Session):
     try:
         await delete_media_comment(

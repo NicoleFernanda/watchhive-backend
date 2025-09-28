@@ -10,6 +10,7 @@ from routers.forum_message_routes import forum_message_router
 from routers.forum_participant_routes import forum_participant_router
 from routers.media_comment_routes import media_comment_router
 from routers.media_routes import media_router
+from routers.review_routes import review_router
 from routers.user_routes import user_router
 from settings import settings
 
@@ -32,6 +33,7 @@ app.include_router(media_comment_router)
 app.include_router(forum_group_router)
 app.include_router(forum_message_router)
 app.include_router(forum_participant_router)
+app.include_router(review_router)
 
 
 @app.get('/')

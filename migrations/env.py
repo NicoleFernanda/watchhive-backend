@@ -6,6 +6,7 @@ from models.forum_group_model import ForumGroup
 from models.forum_comment_model import ForumMessage
 from models.media_model import Genre, Media
 from models.media_comment_model import MediaComment
+from models.review_model import Review
 from settings import settings 
 
 from logging.config import fileConfig

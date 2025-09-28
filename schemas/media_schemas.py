@@ -38,4 +38,6 @@ class GetMediaSchema(BaseModel):
 
     comments: list[GetMediaCommentSchema]
 
+    average_score: float
+
     model_config = ConfigDict(from_attributes=True)

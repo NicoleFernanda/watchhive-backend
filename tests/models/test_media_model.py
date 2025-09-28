@@ -48,5 +48,6 @@ async def test_create_media(session: AsyncSession, mock_db_time):
         'vote_average': 2,
         'vote_count': 3,
         "genres": [],
-        "comments": []
+        "comments": [],
+        "reviews": []
     }

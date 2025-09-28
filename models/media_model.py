@@ -1,10 +1,11 @@
 from datetime import date
 from typing import List
 
-from sqlalchemy import Column, ForeignKey, Table
-from sqlalchemy.orm import Mapped, mapped_column, relationship
+from sqlalchemy import Column, ForeignKey, func, select, Table
+from sqlalchemy.orm import column_property, Mapped, mapped_column, relationship
 
 from models.media_comment_model import MediaComment
+from models.review_model import Review
 
 from .base import Base
 
@@ -58,3 +59,15 @@ class Media(Base):
         cascade='all, delete-orphan',
         lazy='selectin',
     )
+
+    reviews: Mapped[List['Review']] = relationship(
+        lazy='selectin',
+        cascade='all, delete-orphan',
+        init=False,
+    )
+
+    # average_score: Mapped[float | None] = column_property(
+    #     select(func.avg(Review.score))
+    #     .where(Review.media_id == id) # id é a coluna 'id' da classe Media
+    #     .scalar_subquery()
+    # )
