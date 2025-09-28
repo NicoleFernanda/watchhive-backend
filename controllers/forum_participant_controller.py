@@ -98,7 +98,7 @@ async def existing_forum_participant(id_forum_group: int, id_participant: int, s
 
     existing_participant = await session.scalar(
         select(ForumParticipant)
-        .where((ForumParticipant.user_id == id_participant) and (ForumGroup.id == id_forum_group))
+        .where((ForumParticipant.user_id == id_participant) & (ForumGroup.id == id_forum_group))
     )
 
     if not existing_participant:

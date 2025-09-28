@@ -49,7 +49,7 @@ async def unfollow_user(current_user_id: int, user_to_unfollow_id: int, session:
     follow = await session.scalar(select(Follows)
         .where(
             (Follows.followed_id == user_to_unfollow_id) 
-            and 
+            & 
             (Follows.follower_id == current_user_id)
         )
     )
