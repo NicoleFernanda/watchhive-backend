@@ -5,6 +5,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from exceptions.business_error import BusinessError
 from exceptions.permission_error import PermissionError
 from exceptions.record_not_found_error import RecordNotFoundError
+from models.user_list_model import ListType, UserList
 from models.user_model import User
 from security import get_password_hash
 
@@ -12,6 +13,7 @@ from security import get_password_hash
 async def create_user(username: str, email: str, password: str, session: AsyncSession):
     """
     Método para criação de um usuário novo no banco de dados.
+    Além disso, as listas desse usuário já são criadas.
 
     Args:
         username (str): username do usuário.
@@ -44,6 +46,8 @@ async def create_user(username: str, email: str, password: str, session: AsyncSe
     session.add(user)
     await session.commit()
     await session.refresh(user)
+
+    await create_lists(user.id, session)
 
     return user
 
@@ -181,3 +185,17 @@ async def existing_user(user_id: int, session):
         raise RecordNotFoundError('Usuário não encontrado.')
     
     return user
+
+
+async def create_lists(user_id: int, session: AsyncSession):
+    """
+    Método para crias as listas quero asssitir e assistidos
+    """
+
+    lists_to_create = [
+        UserList(user_id=user_id, name=ListType.WATCHED),
+        UserList(user_id=user_id, name=ListType.TO_WATCH),
+    ]
+
+    session.add_all(lists_to_create)
+    await session.commit()

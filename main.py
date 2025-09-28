@@ -13,6 +13,7 @@ from routers.media_comment_routes import media_comment_router
 from routers.media_routes import media_router
 from routers.review_routes import review_router
 from routers.user_routes import user_router
+from routers.user_list_routes import user_list_router
 from settings import settings
 
 app = FastAPI(
@@ -36,6 +37,7 @@ app.include_router(forum_message_router)
 app.include_router(forum_participant_router)
 app.include_router(review_router)
 app.include_router(follows_router)
+app.include_router(user_list_router)
 
 
 @app.get('/')
