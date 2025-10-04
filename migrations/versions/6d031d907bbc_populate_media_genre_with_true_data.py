@@ -60,10 +60,11 @@ def upgrade() -> None:
         for row in reader:
             key = (int(row["id_themoviedb"]), row["media_type"].strip().lower())
             media_id = media_lookup.get(key)
-            if media_id:
+            genre_id_str = row.get("id_genre") 
+            if media_id and genre_id_str:
                 items_to_insert.append({
                     "media_id": media_id,
-                    "genre_id": int(row["id_genre"])
+                    "genre_id": int(genre_id_str)
                 })
     
     if items_to_insert:

@@ -50,7 +50,7 @@ def upgrade() -> None:
         reader = csv.DictReader(csvfile)
         for row in reader:
             items.append({
-                "id": int(row["id"]),
+                "id": int(row["id_themoviedb"]),
                 "id_imdb": row["id_imdb"],
                 "title": row["title"],
                 "original_title": row["original_title"] or None,
