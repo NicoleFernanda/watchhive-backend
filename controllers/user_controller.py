@@ -1,3 +1,4 @@
+import re
 from sqlalchemy import select
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -10,15 +11,16 @@ from models.user_model import User
 from security import get_password_hash
 
 
-async def create_user(username: str, email: str, password: str, session: AsyncSession):
+async def create_user(name: str, email: str, password: str, profile_picture: str | None, session: AsyncSession):
     """
     Método para criação de um usuário novo no banco de dados.
     Além disso, as listas desse usuário já são criadas.
 
     Args:
-        username (str): username do usuário.
+        name (str): nome do usuário.
         email (str): email do usuário.
         password (str): senha do usuário.
+        profile_picture (str | None): foto de perfil
         session (AsyncSession): sessão do banco de dados ativa.
 
     Raises:
@@ -29,18 +31,17 @@ async def create_user(username: str, email: str, password: str, session: AsyncSe
     """
     user = await session.scalar(
         select(User).where(
-            (User.username == username) | (User.email == email)
+            (User.email == email)
         )
     )
 
     if user:
-        if user.username == username:
-            raise BusinessError('Username em uso.')
-        elif user.email == email:
-            raise BusinessError('Email em uso.')
+        raise BusinessError('Email em uso.')
+    
+    username = await create_unique_username(name=name, session=session)
 
     user = User(
-        username=username, password=get_password_hash(password), email=email
+        name=name, username=username, password=get_password_hash(password), email=email, profile_picture=profile_picture
     )
 
     session.add(user)
@@ -199,3 +200,45 @@ async def create_lists(user_id: int, session: AsyncSession):
 
     session.add_all(lists_to_create)
     await session.commit()
+
+
+async def create_unique_username(session: AsyncSession, name: str) -> str:
+    """
+    Cria um username único a partir do nome do usuário.
+
+    Args:
+        session: A sessão ativa do banco.
+        name: nome completo ou parte do nome do usuário (ex: "João da Silva").
+
+    Returns:
+        Um username único e validado (ex: "joao.silva" ou "joao.silva3").
+    """
+
+    # 1. Limpeza e Normalização (Geração da Base)
+    # Ex: "João da Silva" -> "joao.da.silva"
+    
+    # Remove acentos, caracteres especiais, etc. (Simplificado)
+    normalized_name = re.sub(r'[^\w\s.-]', '', name.lower())
+    # Substitui espaços e pontos por um único ponto
+    base_username = re.sub(r'[.\s]+', '.', normalized_name).strip('.')
+
+    # 2. Verifica a Unicidade
+    
+    current_username = base_username
+    counter = 0
+
+    while True:
+        # 3. Consulta Assíncrona ao Banco de Dados
+        # Verifica se o username já existe
+        stmt = select(User).where(User.username == current_username)
+        result = await session.execute(stmt)
+        existing_user = result.scalars().first()
+
+        if existing_user is None:
+            # O username está disponível!
+            return current_username
+        
+        # 4. Ajuste e Nova Tentativa (Se já existir)
+        # Se o username já existir (ex: 'joao.silva'), tenta 'joao.silva1', 'joao.silva2', etc.
+        counter += 1
+        current_username = f"{base_username}{counter}"

@@ -4,7 +4,7 @@ from pydantic import BaseModel, ConfigDict
 
 # genre
 class GetGenre(BaseModel):
-    name: str
+    id: int
 
     model_config = ConfigDict(from_attributes=True)
 

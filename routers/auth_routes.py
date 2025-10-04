@@ -41,7 +41,7 @@ async def login_for_access_token(
         data={'sub': user.email}
     )
 
-    return {'access_token': access_token, 'token_type': 'Bearer'}
+    return {'access_token': access_token, 'token_type': 'Bearer', 'user': user}
 
 
 @auth_router.post('/refresh_token', response_model=Token)

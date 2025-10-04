@@ -24,7 +24,8 @@ async def create(user: CreateUserSchema, session: Session):
 
     try:
         return await create_user(
-            username=user.username,
+            name=user.name,
+            profile_picture=user.profile_picture,
             email=user.email,
             password=user.password,
             session=session,
