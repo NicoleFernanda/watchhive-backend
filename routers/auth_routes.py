@@ -48,4 +48,4 @@ async def login_for_access_token(
 async def refresh_access_token(user: CurrentUser):
     new_access_token = create_access_token(data={'sub': user.email})
 
-    return {'access_token': new_access_token, 'token_type': 'Bearer'}
+    return {'access_token': new_access_token, 'token_type': 'Bearer', 'user': user}
