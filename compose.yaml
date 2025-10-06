@@ -1,0 +1,27 @@
+services:
+  watchhive_postgres:
+    image: postgres
+    restart: always
+    environment:
+      POSTGRES_USER: app_user
+      POSTGRES_DB: app_db
+      POSTGRES_PASSWORD: app_password
+    ports:
+      - "5432:5432"
+    volumes:
+    - pgdata:/var/lib/postgresql/data
+
+  watchhive_backend:
+    image: watchhive_backend
+    build: .
+    entrypoint: ./entrypoint.sh
+    ports:
+      - "8000:8000"
+    depends_on:
+      - watchhive_postgres
+    environment:
+      DATABASE_URL: postgresql+psycopg://app_user:app_password@watchhive_postgres:5432/app_db
+      ALLOWED_ORIGINS: http://localhost:5173,https://localhost:3000
+
+volumes:
+  pgdata:
