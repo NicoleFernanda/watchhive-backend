@@ -1,4 +1,5 @@
 from datetime import date
+from typing import Union
 from pydantic import BaseModel, ConfigDict
 
 
@@ -41,3 +42,18 @@ class GetMediaSchema(BaseModel):
     average_score: float
 
     model_config = ConfigDict(from_attributes=True)
+
+
+class SendTopMediasInfoSchema(BaseModel):
+    genre_id: int
+    movie: bool
+
+
+class GetMediaShowListSchema(BaseModel):
+    id: int
+    title: str
+    poster_url: str | None
+
+
+class GetMediasSchema(BaseModel):
+    medias: list[GetMediaShowListSchema]

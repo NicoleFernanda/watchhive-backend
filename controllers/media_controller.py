@@ -4,7 +4,7 @@ from sqlalchemy.orm import selectinload
 
 from controllers.user_controller import validate_user
 from exceptions.record_not_found_error import RecordNotFoundError
-from models.media_model import Media
+from models.media_model import Genre, Media
 from models.review_model import Review
 
 
@@ -17,6 +17,35 @@ async def get_media(media_id: int, session: AsyncSession):
         session (AsyncSession): sessão ativa do banco de dados.
     """
     return await existing_media(media_id, session)
+
+
+async def get_random_medias(genre_id: int, movie: bool, session: AsyncSession):
+    """
+    Retorna vinte filmes aleatórios baseado num gênero específico.
+
+    Args:
+        genre_id (int): gênero a ser buscado.
+        movie (bool): infoma se é filme ou não.
+    """
+
+    media_type = 'filme' if movie else 'série'
+
+    medias = await session.scalars(
+        select(Media)
+        .join(Media.genres) 
+        .where(
+            Genre.id == genre_id,  # Filtra pelo gênero
+            Media.media_type == media_type # Filtra pelo tipo ('filme' ou 'série')
+        )
+        .options(
+            selectinload(Media.comments), 
+            selectinload(Media.reviews)
+        )
+        .order_by(func.random())
+        .limit(20)
+    )
+
+    return medias
 
 
 async def existing_media(media_id: int, session: AsyncSession) -> Media:
