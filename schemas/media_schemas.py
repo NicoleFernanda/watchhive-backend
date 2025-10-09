@@ -2,6 +2,8 @@ from datetime import date
 from typing import Union
 from pydantic import BaseModel, ConfigDict, Field
 
+from schemas.commons_schemas import FilterPage
+
 
 # genre
 class GetGenre(BaseModel):
@@ -52,6 +54,10 @@ class SendTopMediasInfoSchema(BaseModel):
 class FilterMedia(BaseModel):
     genre_id: int = Field(description="ID do gênero a ser buscado")
     movie: bool = Field(description="True para filme, False para série")
+
+
+class FilterMediaSearch(FilterPage):
+    term: str = Field()
 
 
 class ShowMediaInListSchema(BaseModel):

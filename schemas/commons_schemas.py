@@ -7,7 +7,7 @@ class Message(BaseModel):
 
 class FilterPage(BaseModel):
     offset: int = Field(0, ge=0)
-    limit: int = Field(100, ge=1)
+    limit: int = Field(50, ge=1)
 
 
 class FilterName(FilterPage):
