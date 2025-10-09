@@ -2,7 +2,7 @@
 from http import HTTPStatus
 from typing import Annotated
 
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, Query
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from controllers.media_controller import get_media, get_random_medias
@@ -11,12 +11,29 @@ from exceptions.permission_error import PermissionError
 from exceptions.record_not_found_error import RecordNotFoundError
 from models.user_model import User
 from schemas.commons_schemas import Message
-from schemas.media_schemas import GetMediaSchema, GetMediasSchema, SendTopMediasInfoSchema
+from schemas.media_schemas import FilterMedia, GetMediaSchema, ShowMediasInListSchema, SendTopMediasInfoSchema
 from security import get_current_user
 
 media_router = APIRouter(prefix='/medias', tags=['media', 'media_comment'])
 Session = Annotated[AsyncSession, Depends(get_session)]
 CurrentUser = Annotated[User, Depends(get_current_user)]
+
+
+@media_router.get('/random', response_model=ShowMediasInListSchema)
+async def read_top_medias(
+    current_user: CurrentUser,
+    session: Session,
+    filter_media: Annotated[FilterMedia, Query()]
+):
+    
+    medias = await get_random_medias(
+        genre_id=filter_media.genre_id,
+        movie=filter_media.movie,
+        session=session,
+    )
+
+    return {'medias': medias}
+
 
 @media_router.get('/{media_id}', response_model=GetMediaSchema)
 async def read_media(
@@ -31,19 +48,3 @@ async def read_media(
         )
     except RecordNotFoundError as u:
         raise HTTPException(status_code=HTTPStatus.NOT_FOUND, detail=str(u))
-    
-
-@media_router.get('/top/20', response_model=GetMediasSchema)
-async def read_top_medias(
-    current_user: CurrentUser,
-    session: Session,
-    query_info: SendTopMediasInfoSchema,
-):
-    
-    medias = await get_random_medias(
-        genre_id=query_info.genre_id,
-        movie=query_info.movie,
-        session=session,
-    )
-
-    return {'medias': medias}

@@ -1,6 +1,6 @@
 from datetime import date
 from typing import Union
-from pydantic import BaseModel, ConfigDict
+from pydantic import BaseModel, ConfigDict, Field
 
 
 # genre
@@ -49,11 +49,16 @@ class SendTopMediasInfoSchema(BaseModel):
     movie: bool
 
 
-class GetMediaShowListSchema(BaseModel):
+class FilterMedia(BaseModel):
+    genre_id: int = Field(description="ID do gênero a ser buscado")
+    movie: bool = Field(description="True para filme, False para série")
+
+
+class ShowMediaInListSchema(BaseModel):
     id: int
     title: str
     poster_url: str | None
 
 
-class GetMediasSchema(BaseModel):
-    medias: list[GetMediaShowListSchema]
+class ShowMediasInListSchema(BaseModel):
+    medias: list[ShowMediaInListSchema]

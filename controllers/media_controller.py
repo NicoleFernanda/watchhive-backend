@@ -37,10 +37,6 @@ async def get_random_medias(genre_id: int, movie: bool, session: AsyncSession):
             Genre.id == genre_id,  # Filtra pelo gênero
             Media.media_type == media_type # Filtra pelo tipo ('filme' ou 'série')
         )
-        .options(
-            selectinload(Media.comments), 
-            selectinload(Media.reviews)
-        )
         .order_by(func.random())
         .limit(20)
     )
