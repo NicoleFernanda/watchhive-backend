@@ -6,13 +6,13 @@ from fastapi import APIRouter, Depends, HTTPException, Query
 from pydantic import Field
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from controllers.media_controller import get_media, get_random_medias, search_medias_by_title
+from controllers.media_controller import get_media, get_random_medias, search_medias_by_title, show_medias_by_genre_page
 from database import get_session
 from exceptions.permission_error import PermissionError
 from exceptions.record_not_found_error import RecordNotFoundError
 from models.user_model import User
 from schemas.commons_schemas import FilterPage, Message
-from schemas.media_schemas import FilterMedia, FilterMediaSearch, GetMediaSchema, ShowMediasInListSchema, SendTopMediasInfoSchema
+from schemas.media_schemas import FilterMedia, FilterMediaSearch, FilterMediaShow, GetMediaSchema, ShowMediasInListSchema, SendTopMediasInfoSchema
 from security import get_current_user
 
 media_router = APIRouter(prefix='/medias', tags=['media', 'media_comment'])
@@ -48,6 +48,24 @@ async def read_top_medias(
         session=session,
         offset=filter_page.offset,
         limit=filter_page.limit,
+    )
+
+    return {'medias': medias}
+
+
+@media_router.get('/show', response_model=ShowMediasInListSchema)
+async def get_medias_by_genre(
+    current_user: CurrentUser,
+    session: Session,
+    filter_page: Annotated[FilterMediaShow, Query()],
+):
+    
+    medias = await show_medias_by_genre_page(
+        genre_id=filter_page.genre_id,
+        movie=filter_page.movie,
+        limit=filter_page.limit,
+        offset=filter_page.offset,
+        session=session,
     )
 
     return {'medias': medias}

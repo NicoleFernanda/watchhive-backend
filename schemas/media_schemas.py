@@ -59,6 +59,12 @@ class FilterMedia(BaseModel):
 class FilterMediaSearch(FilterPage):
     term: str = Field()
 
+class FilterMediaShow(BaseModel):
+    offset: int = Field(0, ge=0)
+    limit: int = Field(50, ge=1)
+    genre_id: int = Field(description="ID do gênero a ser buscado")
+    movie: bool = Field(description="True para filme, False para série")
+
 
 class ShowMediaInListSchema(BaseModel):
     id: int

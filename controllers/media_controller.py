@@ -20,13 +20,15 @@ async def get_media(media_id: int, session: AsyncSession):
     return await existing_media(media_id, session)
 
 
-async def get_random_medias(genre_id: int, movie: bool, session: AsyncSession) -> List[Media]:
+async def get_random_medias(genre_id: int, movie: bool, session: AsyncSession, limit: int = 20, offset: int = 0) -> List[Media]:
     """
     Retorna vinte filmes aleatórios baseado num gênero específico.
 
     Args:
         genre_id (int): gênero a ser buscado.
         movie (bool): infoma se é filme ou não.
+        offset (int): Número de registros a pular (paginação).
+        limit (int): Número máximo de registros a retornar (paginação).
     """
 
     media_type = 'filme' if movie else 'série'
@@ -40,6 +42,7 @@ async def get_random_medias(genre_id: int, movie: bool, session: AsyncSession) -
         )
         .order_by(func.random())
         .limit(20)
+        .offset(offset)
     )
 
     return medias
@@ -75,8 +78,31 @@ async def search_medias_by_title(
         .offset(offset)
         .limit(limit) 
     )
-    
+
     medias = await session.scalars(stmt)
+
+    return medias
+
+
+async def show_medias_by_genre_page(
+    genre_id: int, 
+    movie: bool, 
+    limit: int, 
+    offset: int,
+    session=AsyncSession,
+) -> List[Media]:
+    """
+    Retorna os filmes ou séries aleatórios baseado num gênero específico.
+    Utiliza a função get_random_medias() para auxiliar.
+
+    Args:
+        genre_id (int): gênero a ser buscado.
+        movie (bool): infoma se é filme ou não.
+        offset (int): Número de registros a pular (paginação).
+        limit (int): Número máximo de registros a retornar (paginação).
+    """
+    
+    medias = await get_random_medias(genre_id, movie, session, limit, offset)
 
     return medias
 
