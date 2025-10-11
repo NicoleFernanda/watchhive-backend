@@ -1,5 +1,4 @@
 from dataclasses import asdict
-from datetime import date, datetime
 
 import pytest
 from sqlalchemy import select
@@ -50,7 +49,7 @@ async def test_create_media_comment(session: AsyncSession, mock_db_time, user):
         session.add(comment)
         await session.commit()
         await session.refresh(comment)
-        
+
         media = await session.scalar(
             select(Media)
             .options(

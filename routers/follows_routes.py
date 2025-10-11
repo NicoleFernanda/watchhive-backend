@@ -1,17 +1,15 @@
 from http import HTTPStatus
 from typing import Annotated
 
-from fastapi import APIRouter, Depends, HTTPException, Query
+from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from controllers.follows_controller import follow_user, unfollow_user
 from database import get_session
 from exceptions.business_error import BusinessError
-from exceptions.permission_error import PermissionError
 from exceptions.record_not_found_error import RecordNotFoundError
 from models.user_model import User
-from schemas.commons_schemas import FilterPage, Message
-from schemas.user_schemas import CreateUserSchema, GetUserListSchema, GetUserSchema
+from schemas.commons_schemas import Message
 from security import get_current_user
 
 follows_router = APIRouter(prefix="/users", tags=['users'])

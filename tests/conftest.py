@@ -260,4 +260,3 @@ class MediaCommentFactory(factory.Factory):
     media_id = 1
     user_id = 1
     content = factory.Sequence(lambda n: f'content{n}')
-    

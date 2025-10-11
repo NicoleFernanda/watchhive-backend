@@ -22,6 +22,12 @@ class GetForumParticipantSchema(BaseModel):
 
 
 # posts
+class CreateForumGroupFullSchema(BaseModel):
+    title: str
+    content: str
+    participants: list[GetForumParticipantSchema]
+
+
 class CreateForumGroupSchema(BaseModel):
     title: str
     content: str

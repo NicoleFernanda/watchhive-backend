@@ -1,5 +1,5 @@
 from datetime import date
-from typing import Union
+
 from pydantic import BaseModel, ConfigDict, Field
 
 from schemas.commons_schemas import FilterPage
@@ -58,6 +58,7 @@ class FilterMedia(BaseModel):
 
 class FilterMediaSearch(FilterPage):
     term: str = Field()
+
 
 class FilterMediaShow(BaseModel):
     offset: int = Field(0, ge=0)

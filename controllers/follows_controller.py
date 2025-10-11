@@ -20,7 +20,7 @@ async def follow_user(current_user_id: int, user_to_follow_id: int, session: Asy
     """
     if user_to_follow_id == current_user_id:
         raise BusinessError("Não é possível seguir a si mesmo.")
-    
+
     await existing_user(user_to_follow_id, session)
 
     follow = Follows(
@@ -48,12 +48,12 @@ async def unfollow_user(current_user_id: int, user_to_unfollow_id: int, session:
     """
     follow = await session.scalar(select(Follows)
         .where(
-            (Follows.followed_id == user_to_unfollow_id) 
-            & 
+            (Follows.followed_id == user_to_unfollow_id)
+            &
             (Follows.follower_id == current_user_id)
         )
     )
-    
+
     if follow:
         await session.delete(follow)
         await session.commit()

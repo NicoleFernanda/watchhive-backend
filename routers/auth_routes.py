@@ -10,7 +10,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from database import get_session
 from models.user_model import User
 from schemas.auth_schemas import Token
-from security import create_access_token, get_current_user, verify_password
+from security import create_access_token, get_current_user, get_password_hash, verify_password
 
 auth_router = APIRouter(prefix="/auth", tags=['auth'])
 OAuth2Form = Annotated[OAuth2PasswordRequestForm, Depends()]

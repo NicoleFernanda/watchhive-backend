@@ -3,7 +3,7 @@ from http import HTTPStatus
 
 def test_create_comment_in_media_not_found(client, token):
     response = client.post(
-        f'/medias/1/comment',
+        '/medias/1/comment',
         json={
             'content': 'pior parte do filme foi que acabou.'
         },

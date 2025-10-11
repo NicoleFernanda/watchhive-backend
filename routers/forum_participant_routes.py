@@ -11,10 +11,10 @@ from exceptions.permission_error import PermissionError
 from exceptions.record_not_found_error import RecordNotFoundError
 from models.user_model import User
 from schemas.commons_schemas import Message
-from schemas.forum_schemas import CreateForumParticipantSchema, GetForumMessageSchema, GetForumParticipantSchema
+from schemas.forum_schemas import CreateForumParticipantSchema, GetForumParticipantSchema
 from security import get_current_user
 
-forum_participant_router = APIRouter(prefix='/forum_groups', tags=['forum_messages'])
+forum_participant_router = APIRouter(prefix='/forum_groups', tags=['forum_participants'])
 Session = Annotated[AsyncSession, Depends(get_session)]
 CurrentUser = Annotated[User, Depends(get_current_user)]
 

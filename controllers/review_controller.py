@@ -1,12 +1,9 @@
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy.orm import selectinload
 
 from controllers.media_controller import existing_media
-from controllers.user_controller import validate_user
 from controllers.user_list_controller import add_to_list_to_watched
 from exceptions.business_error import BusinessError
-from exceptions.record_not_found_error import RecordNotFoundError
 from models.media_model import Media
 from models.review_model import Review
 
@@ -32,7 +29,7 @@ async def create_review(media_id: int, user_id: int, score: int, session: AsyncS
 
     if review:
         review.score = score
-            
+
     else:
         # create review
         review = Review(

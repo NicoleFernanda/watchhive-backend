@@ -5,15 +5,15 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 from routers.auth_routes import auth_router
+from routers.follows_routes import follows_router
 from routers.forum_group_routes import forum_group_router
 from routers.forum_message_routes import forum_message_router
 from routers.forum_participant_routes import forum_participant_router
-from routers.follows_routes import follows_router
 from routers.media_comment_routes import media_comment_router
 from routers.media_routes import media_router
 from routers.review_routes import review_router
-from routers.user_routes import user_router
 from routers.user_list_routes import user_list_router
+from routers.user_routes import user_router
 from settings import settings
 
 app = FastAPI(

@@ -1,16 +1,22 @@
 from http import HTTPStatus
-from typing import Annotated
+from typing import Annotated, List
 
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from controllers.forum_group_controller import create_forum_group, delete_forum_group, read_forum_group, update_forum_group
+from controllers.forum_group_controller import (
+    create_forum_group,
+    create_forum_group_full,
+    delete_forum_group,
+    read_forum_group,
+    update_forum_group,
+)
 from database import get_session
 from exceptions.permission_error import PermissionError
 from exceptions.record_not_found_error import RecordNotFoundError
 from models.user_model import User
 from schemas.commons_schemas import Message
-from schemas.forum_schemas import CreateForumGroupSchema, GetForumGroupSchema
+from schemas.forum_schemas import CreateForumGroupFullSchema, CreateForumGroupSchema, GetForumGroupSchema
 from security import get_current_user
 
 forum_group_router = APIRouter(prefix="/forum_groups", tags=['forum_groups'])
@@ -24,6 +30,20 @@ async def create(group: CreateForumGroupSchema, current_user: CurrentUser, sessi
     return await create_forum_group(
         title=group.title,
         content=group.content,
+        user_id=current_user.id,
+        session=session
+    )
+
+
+@forum_group_router.post('/full', status_code=HTTPStatus.CREATED, response_model=GetForumGroupSchema)
+async def create_full(group: CreateForumGroupFullSchema, current_user: CurrentUser, session: Session):
+
+    participant_ids: List[int] = [p.user_id for p in group.participants]
+
+    return await create_forum_group_full(
+        title=group.title,
+        content=group.content,
+        participants=participant_ids,
         user_id=current_user.id,
         session=session
     )

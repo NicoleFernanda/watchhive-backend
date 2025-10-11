@@ -3,7 +3,7 @@ from http import HTTPStatus
 
 def test_read_media_not_found(client, token):
     response = client.get(
-        f'/medias/1',
+        '/medias/1',
         headers={'Authorization': f'Bearer {token}'}
     )
     assert response.status_code == HTTPStatus.NOT_FOUND

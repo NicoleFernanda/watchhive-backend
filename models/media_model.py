@@ -1,8 +1,8 @@
 from datetime import date
 from typing import List
 
-from sqlalchemy import Column, ForeignKey, func, select, Table
-from sqlalchemy.orm import column_property, Mapped, mapped_column, relationship
+from sqlalchemy import Column, ForeignKey, Table
+from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from models.media_comment_model import MediaComment
 from models.review_model import Review

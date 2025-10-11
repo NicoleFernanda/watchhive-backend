@@ -5,7 +5,13 @@ class CreateUserSchema(BaseModel):
     name: str
     email: EmailStr  # formato de e-mail, com o @
     password: str
-    profile_picture: str | None
+    avatar: int = 1
+
+
+class PatchUserSchema(BaseModel):
+    name: str | None = None
+    avatar: int | None = None
+    password: str | None = None
 
 
 class GetUserSchema(BaseModel):
@@ -13,7 +19,7 @@ class GetUserSchema(BaseModel):
     username: str
     name: str
     email: EmailStr
-    profile_picture: str | None
+    avatar: int
 
     model_config = ConfigDict(from_attributes=True)
 
@@ -26,6 +32,6 @@ class TokentUserSchema(BaseModel):
     id: int
     name: str
     email: EmailStr
-    profile_picture: str | None
+    avatar: int
 
     model_config = ConfigDict(from_attributes=True)

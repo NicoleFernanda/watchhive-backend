@@ -1,3 +1,4 @@
+from typing import List
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -44,6 +45,45 @@ async def create_forum_group(title: str, content: str, user_id: id, session: Asy
     await session.refresh(new_participant)
 
     return new_forum_group
+
+
+async def create_forum_group_full(
+    title: str,
+    content: str,
+    participants: List[int], # Lista de schemas de participantes
+    user_id: int, # O ID do criador do grupo (será o primeiro participante)
+    session: AsyncSession
+) -> 'ForumGroup':
+    """
+    Cria um novo ForumGroup e adiciona o criador e outros usuários como participantes.
+    """
+    
+    new_group = ForumGroup(
+        title=title,
+        content=content,
+        user_id=user_id # user_id é o criador
+    )
+
+    session.add(new_group)
+    await session.flush()
+    
+    # Garante que o criador do grupo também seja um participante
+    all_participant_ids = set(participants)
+    all_participant_ids.add(user_id)
+    
+    participant_objects = []
+    for p_id in all_participant_ids:
+        participant = ForumParticipant(
+            user_id=p_id,
+            forum_group_id=new_group.id
+        )
+        participant_objects.append(participant)
+
+    session.add_all(participant_objects)
+    
+    await session.commit()
+    await session.refresh(new_group) 
+    return new_group
 
 
 async def update_forum_group(

@@ -1,5 +1,7 @@
 import re
-from sqlalchemy import select
+from typing import List
+
+from sqlalchemy import or_, select, update
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -11,7 +13,7 @@ from models.user_model import User
 from security import get_password_hash
 
 
-async def create_user(name: str, email: str, password: str, profile_picture: str | None, session: AsyncSession):
+async def create_user(name: str, email: str, password: str, avatar: int, session: AsyncSession):
     """
     Método para criação de um usuário novo no banco de dados.
     Além disso, as listas desse usuário já são criadas.
@@ -20,7 +22,7 @@ async def create_user(name: str, email: str, password: str, profile_picture: str
         name (str): nome do usuário.
         email (str): email do usuário.
         password (str): senha do usuário.
-        profile_picture (str | None): foto de perfil
+        avatar (int): foto de perfil.
         session (AsyncSession): sessão do banco de dados ativa.
 
     Raises:
@@ -37,11 +39,11 @@ async def create_user(name: str, email: str, password: str, profile_picture: str
 
     if user:
         raise BusinessError('Email em uso.')
-    
+
     username = await create_unique_username(name=name, session=session)
 
     user = User(
-        name=name, username=username, password=get_password_hash(password), email=email, profile_picture=profile_picture
+        name=name, username=username, password=get_password_hash(password), email=email, avatar=avatar
     )
 
     session.add(user)
@@ -71,10 +73,37 @@ async def get_all_users(limit: int, offset: int, session: AsyncSession):
     return users
 
 
+async def patch_user(current_user: User, name: str | None, avatar: int | None, password: str | None, session: AsyncSession):
+    """
+    Método para atualização parcial de um usuário.
+
+    Args:
+        current_user(User): usuário logado.
+        name (str): nome do usuário.
+        avatar (int): avatar do usuário.
+        session (AsyncSession): sessão do banco de dados ativa.
+
+    Returns:
+        user (User): usuário adicionado no banco de dados.
+    """
+
+    if name is not None:
+        current_user.name = name
+
+    if avatar is not None:
+        current_user.avatar = avatar
+
+    # if password is not None:
+    #     current_user.password = get_password_hash(password)
+
+    await session.commit()
+    await session.refresh(current_user)
+    return current_user
+
+
 async def update_user(
         current_user: User,
         user_id: int,
-        username: str,
         email: str,
         password: str,
         session: AsyncSession
@@ -85,7 +114,6 @@ async def update_user(
     Args:
         current_user(User): usuário logado.
         user_id (int): usuário a ser "mexido", passado pela url.
-        username (str): username do usuário.
         email (str): email do usuário.
         password (str): senha do usuário.
         session (AsyncSession): sessão do banco de dados ativa.
@@ -99,7 +127,6 @@ async def update_user(
     validate_user(logger_user_id=current_user.id, user_id_passed=user_id)
 
     try:
-        current_user.username = username
         current_user.password = get_password_hash(password)
         current_user.email = email
         await session.commit()
@@ -184,7 +211,7 @@ async def existing_user(user_id: int, session):
 
     if not user:
         raise RecordNotFoundError('Usuário não encontrado.')
-    
+
     return user
 
 
@@ -202,6 +229,42 @@ async def create_lists(user_id: int, session: AsyncSession):
     await session.commit()
 
 
+async def search_users_by_term(
+    search_term: str,
+    session: AsyncSession,
+    limit: int = 10,
+) -> List[User]:
+    """
+    Busca usuários cujos nomes ou usernames contenha o termo de pesquisa (case-insensitive).
+
+    Args:
+        search_term (str): O termo de pesquisa (ex: 'ba').
+        session (AsyncSession): A sessão ativa do banco.
+        limit (int): Número máximo de registros a retornar (paginação).
+
+    Returns:
+        List[User]: Uma lista de objetos usuários que correspondem à pesquisa.
+    """
+
+    # pesquisa com curingas (%) - tipo o like no sql
+    like_term = f"%{search_term}%"
+
+    stmt = (
+        select(User)
+        .where(
+            or_(
+                User.name.ilike(like_term),
+                User.username.ilike(like_term)
+            )
+        )
+        .order_by(User.name)  # Ordena por nome para melhor usabilidade (ordem alfabética)
+        .limit(limit)
+    )
+    users = await session.scalars(stmt)
+
+    return users
+
+
 async def create_unique_username(session: AsyncSession, name: str) -> str:
     """
     Cria um username único a partir do nome do usuário.
@@ -216,14 +279,14 @@ async def create_unique_username(session: AsyncSession, name: str) -> str:
 
     # 1. Limpeza e Normalização (Geração da Base)
     # Ex: "João da Silva" -> "joao.da.silva"
-    
+
     # Remove acentos, caracteres especiais, etc. (Simplificado)
     normalized_name = re.sub(r'[^\w\s.-]', '', name.lower())
     # Substitui espaços e pontos por um único ponto
     base_username = re.sub(r'[.\s]+', '.', normalized_name).strip('.')
 
     # 2. Verifica a Unicidade
-    
+
     current_username = base_username
     counter = 0
 
@@ -237,7 +300,7 @@ async def create_unique_username(session: AsyncSession, name: str) -> str:
         if existing_user is None:
             # O username está disponível!
             return current_username
-        
+
         # 4. Ajuste e Nova Tentativa (Se já existir)
         # Se o username já existir (ex: 'joao.silva'), tenta 'joao.silva1', 'joao.silva2', etc.
         counter += 1

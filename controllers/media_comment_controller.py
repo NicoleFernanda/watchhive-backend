@@ -1,11 +1,10 @@
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy.orm import selectinload
 
 from controllers.media_controller import existing_media
 from controllers.user_controller import validate_user
 from exceptions.record_not_found_error import RecordNotFoundError
-from models.media_model import Media, MediaComment
+from models.media_model import MediaComment
 
 
 async def create_media_comment(media_id: int, content: str, user_id: int, session: AsyncSession) -> MediaComment:
@@ -22,7 +21,7 @@ async def create_media_comment(media_id: int, content: str, user_id: int, sessio
     media = await existing_media(media_id, session)
 
     new_comment = MediaComment(
-        media_id = media_id,
+        media_id=media_id,
         user_id=user_id,
         content=content
     )
@@ -54,7 +53,7 @@ async def delete_media_comment(media_id: int, comment_id: int, current_user_id: 
 
     if not comment:
         raise RecordNotFoundError("Comentário não encontrado.")
-    
+
     validate_user(current_user_id, comment.user_id)
 
     await session.delete(comment)

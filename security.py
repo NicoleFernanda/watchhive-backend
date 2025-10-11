@@ -50,18 +50,18 @@ def get_password_hash(password: str):
     return pwd_context.hash(password)
 
 
-def verify_password(plain_password: str, hased_password: str) -> bool:
+def verify_password(plain_password: str, hashed_password: str) -> bool:
     """
     Verifica se uma senha em texto plano corresponde ao hash armazenado.
 
     Args:
         plain_password (str): Senha em texto plano.
-        hased_password (str): Senha já criptografada.
+        hashed_password (str): Senha já criptografada.
 
     Returns:
         bool: True se a senha for válida, False caso contrário.
     """
-    return pwd_context.verify(plain_password, hased_password)
+    return pwd_context.verify(plain_password, hashed_password)
 
 
 async def get_current_user(

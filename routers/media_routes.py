@@ -3,16 +3,24 @@ from http import HTTPStatus
 from typing import Annotated
 
 from fastapi import APIRouter, Depends, HTTPException, Query
-from pydantic import Field
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from controllers.media_controller import get_media, get_random_medias, search_medias_by_title, show_medias_by_genre_page
+from controllers.media_controller import (
+    get_media,
+    get_random_medias,
+    search_medias_by_title,
+    show_medias_by_genre_page,
+)
 from database import get_session
-from exceptions.permission_error import PermissionError
 from exceptions.record_not_found_error import RecordNotFoundError
 from models.user_model import User
-from schemas.commons_schemas import FilterPage, Message
-from schemas.media_schemas import FilterMedia, FilterMediaSearch, FilterMediaShow, GetMediaSchema, ShowMediasInListSchema, SendTopMediasInfoSchema
+from schemas.media_schemas import (
+    FilterMedia,
+    FilterMediaSearch,
+    FilterMediaShow,
+    GetMediaSchema,
+    ShowMediasInListSchema,
+)
 from security import get_current_user
 
 media_router = APIRouter(prefix='/medias', tags=['media', 'media_comment'])
@@ -21,12 +29,12 @@ CurrentUser = Annotated[User, Depends(get_current_user)]
 
 
 @media_router.get('/random', response_model=ShowMediasInListSchema)
-async def read_top_medias(
+async def search_media(
     current_user: CurrentUser,
     session: Session,
     filter_media: Annotated[FilterMedia, Query()]
 ):
-    
+
     medias = await get_random_medias(
         genre_id=filter_media.genre_id,
         movie=filter_media.movie,
@@ -37,12 +45,12 @@ async def read_top_medias(
 
 
 @media_router.get('/search', response_model=ShowMediasInListSchema)
-async def read_top_medias(
+async def search_media(
     current_user: CurrentUser,
     session: Session,
     filter_page: Annotated[FilterMediaSearch, Query()],
 ):
-    
+
     medias = await search_medias_by_title(
         search_term=filter_page.term,
         session=session,
@@ -59,7 +67,7 @@ async def get_medias_by_genre(
     session: Session,
     filter_page: Annotated[FilterMediaShow, Query()],
 ):
-    
+
     medias = await show_medias_by_genre_page(
         genre_id=filter_page.genre_id,
         movie=filter_page.movie,

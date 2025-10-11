@@ -1,8 +1,6 @@
 from datetime import datetime
 
-from sqlalchemy import func
-
-from sqlalchemy import ForeignKey
+from sqlalchemy import ForeignKey, func
 from sqlalchemy.orm import Mapped, mapped_column
 
 from .base import Base

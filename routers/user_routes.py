@@ -4,14 +4,14 @@ from typing import Annotated
 from fastapi import APIRouter, Depends, HTTPException, Query
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from controllers.user_controller import create_user, delete_user, get_all_users, get_user, update_user
+from controllers.user_controller import create_user, delete_user, get_all_users, get_user, patch_user, search_users_by_term, update_user
 from database import get_session
 from exceptions.business_error import BusinessError
 from exceptions.permission_error import PermissionError
 from exceptions.record_not_found_error import RecordNotFoundError
 from models.user_model import User
 from schemas.commons_schemas import FilterPage, Message
-from schemas.user_schemas import CreateUserSchema, GetUserListSchema, GetUserSchema
+from schemas.user_schemas import CreateUserSchema, GetUserListSchema, GetUserSchema, PatchUserSchema
 from security import get_current_user
 
 user_router = APIRouter(prefix="/users", tags=['users'])
@@ -25,13 +25,27 @@ async def create(user: CreateUserSchema, session: Session):
     try:
         return await create_user(
             name=user.name,
-            profile_picture=user.profile_picture,
+            avatar=user.avatar,
             email=user.email,
             password=user.password,
             session=session,
         )
     except BusinessError as u:
         raise HTTPException(status_code=HTTPStatus.CONFLICT, detail=str(u))
+
+
+@user_router.get('/me', response_model=GetUserSchema)
+async def read_user(
+    current_user: CurrentUser,
+    session: Session,
+):
+    try:
+        return await get_user(
+            user_id=current_user.id,
+            session=session,
+        )
+    except RecordNotFoundError as u:
+        raise HTTPException(status_code=HTTPStatus.NOT_FOUND, detail=str(u))
 
 
 @user_router.get('/', status_code=HTTPStatus.OK, response_model=GetUserListSchema)
@@ -49,6 +63,21 @@ async def read_all(
     return {"users": users}
 
 
+@user_router.get('/search', response_model=GetUserListSchema)
+async def search_media(
+    current_user: CurrentUser,
+    session: Session,
+    term: str = Query(None, description="Termo de pesquisa para nome ou username do usuário."),
+):
+
+    users = await search_users_by_term(
+        search_term=term,
+        session=session,
+    )
+
+    return {'users': users}
+
+
 @user_router.put('/{user_id}', status_code=HTTPStatus.OK, response_model=GetUserSchema)
 async def update(
     user_id: int,
@@ -61,7 +90,6 @@ async def update(
         return await update_user(
             current_user=current_user,
             user_id=user_id,
-            username=user.username,
             email=user.email,
             password=user.password,
             session=session,
@@ -102,3 +130,19 @@ async def read_user(
         )
     except RecordNotFoundError as u:
         raise HTTPException(status_code=HTTPStatus.NOT_FOUND, detail=str(u))
+
+
+@user_router.patch('/', status_code=HTTPStatus.OK, response_model=GetUserSchema)
+async def patch(
+    user: PatchUserSchema,
+    session: Session,
+    current_user: CurrentUser
+):
+
+    return await patch_user(
+        current_user=current_user,
+        name=user.name,
+        password=current_user.password,
+        avatar=user.avatar,
+        session=session,
+    )
