@@ -10,6 +10,11 @@ COPY . /app
 WORKDIR /app
 RUN uv sync --frozen --no-cache
 
+# cria usuario (obrigatorio do choreo)
+RUN groupadd -r choreo && useradd --no-log-init -r -g choreo -u 10001 choreo
+RUN chown -R 10001:choreo /app
+USER 10001
+
 COPY entrypoint.sh /usr/local/bin/entrypoint.sh
 RUN chmod +x /usr/local/bin/entrypoint.sh
 ENTRYPOINT ["/usr/local/bin/entrypoint.sh"]
