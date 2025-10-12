@@ -14,9 +14,11 @@ RUN uv sync --frozen --no-cache
 RUN groupadd -r choreo && useradd --no-log-init -r -g choreo -u 10001 choreo
 
 COPY entrypoint.sh /app/entrypoint.sh
-RUN chmod +x /app/entrypoint.sh
 
 RUN chown -R 10001:choreo /app
+
+RUN chmod +x /app/entrypoint.sh
+
 USER 10001
 
 ENTRYPOINT ["/app/entrypoint.sh"] 

@@ -4,6 +4,8 @@
 # Espera o banco de dados 'watchhive_postgres' estar pronto
 export UV_CACHE_DIR="/tmp/uv_cache"
 
+cd /app
+
 echo "Rodando migracoes Alembic."
 uv run alembic upgrade head
 echo "Migracoes concluídas."
