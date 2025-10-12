@@ -13,8 +13,7 @@ from database import get_session
 from models.user_model import User
 from settings import settings
 
-# pwd_context = PasswordHash.recommended()
-pwd_context = PasswordHash(algorithm='argon2', time_cost=2, memory_cost=32)
+pwd_context = PasswordHash.recommended()
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl='auth/token')
 
 
