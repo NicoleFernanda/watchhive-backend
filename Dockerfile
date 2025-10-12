@@ -5,10 +5,9 @@ COPY --from=ghcr.io/astral-sh/uv:latest /uv /uvx /bin/
 
 # Copy the application into the container.
 COPY . /app
-
-# Install the application dependencies.
 WORKDIR /app
-RUN uv sync --frozen --no-cache
+
+RUN /bin/uv pip install --no-cache -r requirements.txt
 
 # cria usuario (obrigatorio do choreo)
 RUN groupadd -r choreo && useradd --no-log-init -r -g choreo -u 10001 choreo
