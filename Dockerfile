@@ -12,12 +12,14 @@ RUN uv sync --frozen --no-cache
 
 # cria usuario (obrigatorio do choreo)
 RUN groupadd -r choreo && useradd --no-log-init -r -g choreo -u 10001 choreo
+
+COPY entrypoint.sh /app/entrypoint.sh
+RUN chmod +x /app/entrypoint.sh
+
 RUN chown -R 10001:choreo /app
 USER 10001
 
-COPY entrypoint.sh /usr/local/bin/entrypoint.sh
-RUN chmod +x /usr/local/bin/entrypoint.sh
-ENTRYPOINT ["/usr/local/bin/entrypoint.sh"]
+ENTRYPOINT ["/app/entrypoint.sh"] 
 
 # Run the application. Tirei por causa do entrypoint; LOCAL: DEIXAR
 #  CMD ["/app/.venv/bin/fastapi", "run", "main.py", "--port", "8000", "--host", "0.0.0.0"]
