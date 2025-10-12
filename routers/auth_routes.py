@@ -3,6 +3,7 @@ from http import HTTPStatus
 from typing import Annotated
 
 from fastapi import APIRouter, Depends, HTTPException
+from fastapi.concurrency import run_in_threadpool
 from fastapi.security import OAuth2PasswordRequestForm
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -30,8 +31,14 @@ async def login_for_access_token(
             status_code=HTTPStatus.UNAUTHORIZED,
             detail='E-mail não cadastrado.'
         )
-
-    if not verify_password(form_data.password, user.password):
+    
+    is_password_valid = await run_in_threadpool(
+        verify_password,
+        form_data.password, 
+        user.password # Assumindo que user.password é o hash
+    )
+    
+    if not is_password_valid:
         raise HTTPException(
             status_code=HTTPStatus.UNAUTHORIZED,
             detail='Senha incorreta.'
