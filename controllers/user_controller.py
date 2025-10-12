@@ -1,6 +1,7 @@
 import re
 from typing import List
 
+from fastapi.concurrency import run_in_threadpool
 from sqlalchemy import or_, select, update
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -42,8 +43,12 @@ async def create_user(name: str, email: str, password: str, avatar: int, session
 
     username = await create_unique_username(name=name, session=session)
 
+    hashed_password = await run_in_threadpool(
+        lambda: get_password_hash(password)
+    )
+
     user = User(
-        name=name, username=username, password=get_password_hash(password), email=email, avatar=avatar
+        name=name, username=username, password=hashed_password, email=email, avatar=avatar
     )
 
     session.add(user)
