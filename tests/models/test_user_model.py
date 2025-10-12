@@ -10,7 +10,7 @@ from models.user_model import User
 @pytest.mark.asyncio
 async def test_create_user(session: AsyncSession, mock_db_time):
     with mock_db_time(model=User) as time:
-        new_user = User(username='alice', password='secret', email='teste@test', profile_picture=None, name='alice da silva')
+        new_user = User(username='alice', password='secret', email='teste@test', avatar=3, name='alice da silva')
 
         session.add(new_user)
         await session.commit()
@@ -23,7 +23,7 @@ async def test_create_user(session: AsyncSession, mock_db_time):
         'password': 'secret',
         'email': 'teste@test',
         'name': 'alice da silva',
-        'profile_picture': None,
+        'avatar': 3,
         'created_at': time,
         'updated_at': time,
         'forum_groups': [],

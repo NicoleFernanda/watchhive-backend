@@ -10,7 +10,6 @@ def test_create_user(client):
             'name': 'bob lindo',
             'email': 'bob@example.com',
             'password': 'mynewpassword',
-            'profile_picture': None
         },
     )
     assert response.status_code == HTTPStatus.CREATED
@@ -19,7 +18,7 @@ def test_create_user(client):
         'email': 'bob@example.com',
         'id': 1,
         'name': 'bob lindo',
-        'profile_picture': None
+        'avatar': 1
     }
 
 
@@ -29,8 +28,7 @@ def test_create_user_same_email(client, user):
         json={
             'name': 'bob lindo',
             'email': user.email,
-            'password': 'mynewpassword',
-            'profile_picture': None
+            'password': 'mynewpassword'
         },
     )
     assert response.status_code == HTTPStatus.CONFLICT
@@ -104,7 +102,7 @@ def test_get_user(client, user):
         'email': user.email,
         'id': user.id,
         'name': user.name,
-        'profile_picture': user.profile_picture
+        'avatar': user.avatar
     }
 
 

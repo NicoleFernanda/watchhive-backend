@@ -204,7 +204,7 @@ class UserFactory(factory.Factory):
     username = factory.Sequence(lambda n: f'test{n}')
     email = factory.LazyAttribute(lambda obj: f'{obj.username}@test.com')
     password = factory.LazyAttribute(lambda obj: f'{obj.username}123')
-    profile_picture = None
+    avatar = 1
     name = "name"
 
 
