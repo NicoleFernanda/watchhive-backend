@@ -2,8 +2,11 @@
 
 # Necessário ter o 'netcat' instalado no Dockerfile (como discutido anteriormente)
 # Espera o banco de dados 'watchhive_postgres' estar pronto
+export UV_CACHE_DIR="/tmp/uv_cache"
+
+echo "Rodando migracoes Alembic."
 uv run alembic upgrade head
-echo "Migrações concluídas."
+echo "Migracoes concluídas."
 
 # 2. Inicia a aplicação (Substituindo 'poetry run uvicorn')
 # Usamos 'exec' para garantir que o script seja substituído pelo processo do servidor.
