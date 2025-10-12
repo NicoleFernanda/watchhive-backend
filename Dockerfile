@@ -19,6 +19,10 @@ RUN chown -R 10001:choreo /app
 
 RUN chmod +x /app/entrypoint.sh
 
+# SOLUÇÃO FORÇADA: Garante permissão total de leitura/execução no ambiente virtual
+# O uv precisa disso para 'canonicalize' o path.
+RUN chmod -R +rx /app/.venv
+
 USER 10001
 
 ENTRYPOINT ["/app/entrypoint.sh"] 
