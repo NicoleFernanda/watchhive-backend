@@ -19,7 +19,7 @@ RUN chown -R 10001:choreo /app
 
 RUN chmod +x /app/entrypoint.sh
 
-RUN chmod -R +rx /app/.venv
+RUN chmod +x /app/.venv/bin/*
 
 USER 10001
 
