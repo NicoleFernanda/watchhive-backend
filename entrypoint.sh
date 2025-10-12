@@ -7,7 +7,7 @@ export UV_CACHE_DIR="/tmp/uv_cache"
 cd /app
 
 echo "Rodando migracoes Alembic."
-uv run alembic upgrade head
+/app/.venv/bin/python3 -m alembic upgrade head
 echo "Migracoes concluídas."
 
 # 2. Inicia a aplicação (Substituindo 'poetry run uvicorn')
