@@ -1,0 +1,1438 @@
+openapi: 3.1.0
+info:
+  title: WatchHive
+  version: 0.1.0
+paths:
+  /users/:
+    post:
+      tags:
+      - users
+      summary: Create
+      operationId: create_users__post
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateUserSchema'
+      responses:
+        '201':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GetUserSchema'
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+    get:
+      tags:
+      - users
+      summary: Read All
+      operationId: read_all_users__get
+      security:
+      - OAuth2PasswordBearer: []
+      parameters:
+      - name: offset
+        in: query
+        required: false
+        schema:
+          type: integer
+          minimum: 0
+          default: 0
+          title: Offset
+      - name: limit
+        in: query
+        required: false
+        schema:
+          type: integer
+          minimum: 1
+          default: 50
+          title: Limit
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GetUserListSchema'
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+    patch:
+      tags:
+      - users
+      summary: Patch
+      operationId: patch_users__patch
+      security:
+      - OAuth2PasswordBearer: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchUserSchema'
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GetUserSchema'
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /users/me:
+    get:
+      tags:
+      - users
+      summary: Read User
+      operationId: read_user_users_me_get
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GetUserSchema'
+      security:
+      - OAuth2PasswordBearer: []
+  /users/search:
+    get:
+      tags:
+      - users
+      summary: Search Media
+      operationId: search_media_users_search_get
+      security:
+      - OAuth2PasswordBearer: []
+      parameters:
+      - name: term
+        in: query
+        required: false
+        schema:
+          type: string
+          description: "Termo de pesquisa para nome ou username do usu\xE1rio."
+          title: Term
+        description: "Termo de pesquisa para nome ou username do usu\xE1rio."
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GetUserListSchema'
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /users/{user_id}:
+    put:
+      tags:
+      - users
+      summary: Update
+      operationId: update_users__user_id__put
+      security:
+      - OAuth2PasswordBearer: []
+      parameters:
+      - name: user_id
+        in: path
+        required: true
+        schema:
+          type: integer
+          title: User Id
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateUserSchema'
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GetUserSchema'
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+    delete:
+      tags:
+      - users
+      summary: Delete
+      operationId: delete_users__user_id__delete
+      security:
+      - OAuth2PasswordBearer: []
+      parameters:
+      - name: user_id
+        in: path
+        required: true
+        schema:
+          type: integer
+          title: User Id
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Message'
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+    get:
+      tags:
+      - users
+      summary: Read User
+      operationId: read_user_users__user_id__get
+      parameters:
+      - name: user_id
+        in: path
+        required: true
+        schema:
+          type: integer
+          title: User Id
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GetUserSchema'
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /auth/token:
+    post:
+      tags:
+      - auth
+      summary: Login For Access Token
+      operationId: login_for_access_token_auth_token_post
+      requestBody:
+        content:
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/Body_login_for_access_token_auth_token_post'
+        required: true
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Token'
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /auth/refresh_token:
+    post:
+      tags:
+      - auth
+      summary: Refresh Access Token
+      operationId: refresh_access_token_auth_refresh_token_post
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Token'
+      security:
+      - OAuth2PasswordBearer: []
+  /medias/random:
+    get:
+      tags:
+      - media
+      - media_comment
+      summary: Search Media
+      operationId: search_media_medias_random_get
+      security:
+      - OAuth2PasswordBearer: []
+      parameters:
+      - name: genre_id
+        in: query
+        required: true
+        schema:
+          type: integer
+          description: "ID do g\xEAnero a ser buscado"
+          title: Genre Id
+        description: "ID do g\xEAnero a ser buscado"
+      - name: movie
+        in: query
+        required: true
+        schema:
+          type: boolean
+          description: "True para filme, False para s\xE9rie"
+          title: Movie
+        description: "True para filme, False para s\xE9rie"
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ShowMediasInListSchema'
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /medias/search:
+    get:
+      tags:
+      - media
+      - media_comment
+      summary: Search Media
+      operationId: search_media_medias_search_get
+      security:
+      - OAuth2PasswordBearer: []
+      parameters:
+      - name: offset
+        in: query
+        required: false
+        schema:
+          type: integer
+          minimum: 0
+          default: 0
+          title: Offset
+      - name: limit
+        in: query
+        required: false
+        schema:
+          type: integer
+          minimum: 1
+          default: 50
+          title: Limit
+      - name: term
+        in: query
+        required: true
+        schema:
+          type: string
+          title: Term
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ShowMediasInListSchema'
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /medias/show:
+    get:
+      tags:
+      - media
+      - media_comment
+      summary: Get Medias By Genre
+      operationId: get_medias_by_genre_medias_show_get
+      security:
+      - OAuth2PasswordBearer: []
+      parameters:
+      - name: offset
+        in: query
+        required: false
+        schema:
+          type: integer
+          minimum: 0
+          default: 0
+          title: Offset
+      - name: limit
+        in: query
+        required: false
+        schema:
+          type: integer
+          minimum: 1
+          default: 50
+          title: Limit
+      - name: genre_id
+        in: query
+        required: true
+        schema:
+          type: integer
+          description: "ID do g\xEAnero a ser buscado"
+          title: Genre Id
+        description: "ID do g\xEAnero a ser buscado"
+      - name: movie
+        in: query
+        required: true
+        schema:
+          type: boolean
+          description: "True para filme, False para s\xE9rie"
+          title: Movie
+        description: "True para filme, False para s\xE9rie"
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ShowMediasInListSchema'
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /medias/{media_id}:
+    get:
+      tags:
+      - media
+      - media_comment
+      summary: Read Media
+      operationId: read_media_medias__media_id__get
+      security:
+      - OAuth2PasswordBearer: []
+      parameters:
+      - name: media_id
+        in: path
+        required: true
+        schema:
+          type: integer
+          title: Media Id
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GetMediaSchema'
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /medias/{id_media}/comment:
+    post:
+      tags:
+      - media
+      - media_comment
+      summary: Create
+      operationId: create_medias__id_media__comment_post
+      security:
+      - OAuth2PasswordBearer: []
+      parameters:
+      - name: id_media
+        in: path
+        required: true
+        schema:
+          type: integer
+          title: Id Media
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateMediaCommentSchema'
+      responses:
+        '201':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GetMediaCommentSchema'
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /medias/{id_media}/comment/{id_comment}:
+    delete:
+      tags:
+      - media
+      - media_comment
+      summary: Delete
+      operationId: delete_medias__id_media__comment__id_comment__delete
+      security:
+      - OAuth2PasswordBearer: []
+      parameters:
+      - name: id_media
+        in: path
+        required: true
+        schema:
+          type: integer
+          title: Id Media
+      - name: id_comment
+        in: path
+        required: true
+        schema:
+          type: integer
+          title: Id Comment
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Message'
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /forum_groups/:
+    post:
+      tags:
+      - forum_groups
+      summary: Create
+      operationId: create_forum_groups__post
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateForumGroupSchema'
+        required: true
+      responses:
+        '201':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GetForumGroupSchema'
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+      security:
+      - OAuth2PasswordBearer: []
+  /forum_groups/full:
+    post:
+      tags:
+      - forum_groups
+      summary: Create Full
+      operationId: create_full_forum_groups_full_post
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateForumGroupFullSchema'
+        required: true
+      responses:
+        '201':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GetForumGroupSchema'
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+      security:
+      - OAuth2PasswordBearer: []
+  /forum_groups/{forum_group_id}:
+    put:
+      tags:
+      - forum_groups
+      summary: Update
+      operationId: update_forum_groups__forum_group_id__put
+      security:
+      - OAuth2PasswordBearer: []
+      parameters:
+      - name: forum_group_id
+        in: path
+        required: true
+        schema:
+          type: integer
+          title: Forum Group Id
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateForumGroupSchema'
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GetForumGroupSchema'
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+    delete:
+      tags:
+      - forum_groups
+      summary: Delete
+      operationId: delete_forum_groups__forum_group_id__delete
+      security:
+      - OAuth2PasswordBearer: []
+      parameters:
+      - name: forum_group_id
+        in: path
+        required: true
+        schema:
+          type: integer
+          title: Forum Group Id
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Message'
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+    get:
+      tags:
+      - forum_groups
+      summary: Read
+      operationId: read_forum_groups__forum_group_id__get
+      security:
+      - OAuth2PasswordBearer: []
+      parameters:
+      - name: forum_group_id
+        in: path
+        required: true
+        schema:
+          type: integer
+          title: Forum Group Id
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GetForumGroupSchema'
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /forum_groups/{id_forum_group}/messages:
+    post:
+      tags:
+      - forum_messages
+      summary: Create
+      operationId: create_forum_groups__id_forum_group__messages_post
+      security:
+      - OAuth2PasswordBearer: []
+      parameters:
+      - name: id_forum_group
+        in: path
+        required: true
+        schema:
+          type: integer
+          title: Id Forum Group
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateForumMessageSchema'
+      responses:
+        '201':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GetForumMessageSchema'
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /forum_groups/{id_forum_group}/messages/{id_message}:
+    delete:
+      tags:
+      - forum_messages
+      summary: Delete
+      operationId: delete_forum_groups__id_forum_group__messages__id_message__delete
+      security:
+      - OAuth2PasswordBearer: []
+      parameters:
+      - name: id_forum_group
+        in: path
+        required: true
+        schema:
+          type: integer
+          title: Id Forum Group
+      - name: id_message
+        in: path
+        required: true
+        schema:
+          type: integer
+          title: Id Message
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Message'
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /forum_groups/{id_forum_group}/participants:
+    post:
+      tags:
+      - forum_participants
+      summary: Create
+      operationId: create_forum_groups__id_forum_group__participants_post
+      security:
+      - OAuth2PasswordBearer: []
+      parameters:
+      - name: id_forum_group
+        in: path
+        required: true
+        schema:
+          type: integer
+          title: Id Forum Group
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateForumParticipantSchema'
+      responses:
+        '201':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GetForumParticipantSchema'
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /forum_groups/{id_forum_group}/participants/{id_participant}:
+    delete:
+      tags:
+      - forum_participants
+      summary: Delete
+      operationId: delete_forum_groups__id_forum_group__participants__id_participant__delete
+      security:
+      - OAuth2PasswordBearer: []
+      parameters:
+      - name: id_forum_group
+        in: path
+        required: true
+        schema:
+          type: integer
+          title: Id Forum Group
+      - name: id_participant
+        in: path
+        required: true
+        schema:
+          type: integer
+          title: Id Participant
+      responses:
+        '201':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Message'
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /medias/{id_media}/review:
+    post:
+      tags:
+      - forum_messages
+      summary: Create
+      operationId: create_medias__id_media__review_post
+      security:
+      - OAuth2PasswordBearer: []
+      parameters:
+      - name: id_media
+        in: path
+        required: true
+        schema:
+          type: integer
+          title: Id Media
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateReviewSchema'
+      responses:
+        '201':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GetReviewSchema'
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /users/{user_id}/follow:
+    post:
+      tags:
+      - users
+      summary: Create
+      operationId: create_users__user_id__follow_post
+      security:
+      - OAuth2PasswordBearer: []
+      parameters:
+      - name: user_id
+        in: path
+        required: true
+        schema:
+          type: integer
+          title: User Id
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Message'
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /users/{user_id}/unfollow:
+    delete:
+      tags:
+      - users
+      summary: Delete
+      operationId: delete_users__user_id__unfollow_delete
+      security:
+      - OAuth2PasswordBearer: []
+      parameters:
+      - name: user_id
+        in: path
+        required: true
+        schema:
+          type: integer
+          title: User Id
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Message'
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /medias/{media_id}/lists/to-watch:
+    post:
+      tags:
+      - medias
+      summary: Create
+      operationId: create_medias__media_id__lists_to_watch_post
+      security:
+      - OAuth2PasswordBearer: []
+      parameters:
+      - name: media_id
+        in: path
+        required: true
+        schema:
+          type: integer
+          title: Media Id
+      responses:
+        '201':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Message'
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+    delete:
+      tags:
+      - medias
+      summary: Delete
+      operationId: delete_medias__media_id__lists_to_watch_delete
+      security:
+      - OAuth2PasswordBearer: []
+      parameters:
+      - name: media_id
+        in: path
+        required: true
+        schema:
+          type: integer
+          title: Media Id
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Message'
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /medias/lists/to-watch:
+    get:
+      tags:
+      - medias
+      summary: Get Watch
+      operationId: get_watch_medias_lists_to_watch_get
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ShowMediasInListSchema'
+      security:
+      - OAuth2PasswordBearer: []
+  /medias/lists/watched:
+    get:
+      tags:
+      - medias
+      summary: Get Watched
+      operationId: get_watched_medias_lists_watched_get
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ShowMediasInListSchema'
+      security:
+      - OAuth2PasswordBearer: []
+  /:
+    get:
+      summary: Read Root
+      operationId: read_root__get
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema: {}
+components:
+  schemas:
+    Body_login_for_access_token_auth_token_post:
+      properties:
+        grant_type:
+          anyOf:
+          - type: string
+            pattern: ^password$
+          - type: 'null'
+          title: Grant Type
+        username:
+          type: string
+          title: Username
+        password:
+          type: string
+          format: password
+          title: Password
+        scope:
+          type: string
+          title: Scope
+          default: ''
+        client_id:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Client Id
+        client_secret:
+          anyOf:
+          - type: string
+          - type: 'null'
+          format: password
+          title: Client Secret
+      type: object
+      required:
+      - username
+      - password
+      title: Body_login_for_access_token_auth_token_post
+    CreateForumGroupFullSchema:
+      properties:
+        title:
+          type: string
+          title: Title
+        content:
+          type: string
+          title: Content
+        participants:
+          items:
+            $ref: '#/components/schemas/GetForumParticipantSchema'
+          type: array
+          title: Participants
+      type: object
+      required:
+      - title
+      - content
+      - participants
+      title: CreateForumGroupFullSchema
+    CreateForumGroupSchema:
+      properties:
+        title:
+          type: string
+          title: Title
+        content:
+          type: string
+          title: Content
+      type: object
+      required:
+      - title
+      - content
+      title: CreateForumGroupSchema
+    CreateForumMessageSchema:
+      properties:
+        content:
+          type: string
+          title: Content
+      type: object
+      required:
+      - content
+      title: CreateForumMessageSchema
+    CreateForumParticipantSchema:
+      properties:
+        user_id:
+          type: integer
+          title: User Id
+      type: object
+      required:
+      - user_id
+      title: CreateForumParticipantSchema
+    CreateMediaCommentSchema:
+      properties:
+        content:
+          type: string
+          title: Content
+      type: object
+      required:
+      - content
+      title: CreateMediaCommentSchema
+    CreateReviewSchema:
+      properties:
+        score:
+          type: integer
+          title: Score
+      type: object
+      required:
+      - score
+      title: CreateReviewSchema
+    CreateUserSchema:
+      properties:
+        name:
+          type: string
+          title: Name
+        email:
+          type: string
+          format: email
+          title: Email
+        password:
+          type: string
+          title: Password
+        avatar:
+          type: integer
+          title: Avatar
+          default: 1
+      type: object
+      required:
+      - name
+      - email
+      - password
+      title: CreateUserSchema
+    GetForumGroupSchema:
+      properties:
+        title:
+          type: string
+          title: Title
+        content:
+          type: string
+          title: Content
+        id:
+          type: integer
+          title: Id
+        user_id:
+          type: integer
+          title: User Id
+        messages:
+          items:
+            $ref: '#/components/schemas/GetForumMessageSchema'
+          type: array
+          title: Messages
+        participants:
+          items:
+            $ref: '#/components/schemas/GetForumParticipantSchema'
+          type: array
+          title: Participants
+      type: object
+      required:
+      - title
+      - content
+      - id
+      - user_id
+      - messages
+      - participants
+      title: GetForumGroupSchema
+    GetForumMessageSchema:
+      properties:
+        id:
+          type: integer
+          title: Id
+        user_id:
+          type: integer
+          title: User Id
+        content:
+          type: string
+          title: Content
+      type: object
+      required:
+      - id
+      - user_id
+      - content
+      title: GetForumMessageSchema
+    GetForumParticipantSchema:
+      properties:
+        user_id:
+          type: integer
+          title: User Id
+      type: object
+      required:
+      - user_id
+      title: GetForumParticipantSchema
+    GetGenre:
+      properties:
+        id:
+          type: integer
+          title: Id
+      type: object
+      required:
+      - id
+      title: GetGenre
+    GetMediaCommentSchema:
+      properties:
+        id:
+          type: integer
+          title: Id
+        user_id:
+          type: integer
+          title: User Id
+        content:
+          type: string
+          title: Content
+      type: object
+      required:
+      - id
+      - user_id
+      - content
+      title: GetMediaCommentSchema
+    GetMediaSchema:
+      properties:
+        id:
+          type: integer
+          title: Id
+        title:
+          type: string
+          title: Title
+        original_title:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Original Title
+        description:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Description
+        dt_launch:
+          anyOf:
+          - type: string
+            format: date
+          - type: 'null'
+          title: Dt Launch
+        original_language:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Original Language
+        media_type:
+          type: string
+          title: Media Type
+        poster_url:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Poster Url
+        adult:
+          anyOf:
+          - type: boolean
+          - type: 'null'
+          title: Adult
+        genres:
+          items:
+            $ref: '#/components/schemas/GetGenre'
+          type: array
+          title: Genres
+        comments:
+          items:
+            $ref: '#/components/schemas/GetMediaCommentSchema'
+          type: array
+          title: Comments
+        average_score:
+          type: number
+          title: Average Score
+      type: object
+      required:
+      - id
+      - title
+      - original_title
+      - description
+      - dt_launch
+      - original_language
+      - media_type
+      - poster_url
+      - adult
+      - genres
+      - comments
+      - average_score
+      title: GetMediaSchema
+    GetReviewSchema:
+      properties:
+        id:
+          type: integer
+          title: Id
+        media_id:
+          type: integer
+          title: Media Id
+        user_id:
+          type: integer
+          title: User Id
+        score:
+          type: integer
+          title: Score
+      type: object
+      required:
+      - id
+      - media_id
+      - user_id
+      - score
+      title: GetReviewSchema
+    GetUserListSchema:
+      properties:
+        users:
+          items:
+            $ref: '#/components/schemas/GetUserSchema'
+          type: array
+          title: Users
+      type: object
+      required:
+      - users
+      title: GetUserListSchema
+    GetUserSchema:
+      properties:
+        id:
+          type: integer
+          title: Id
+        username:
+          type: string
+          title: Username
+        name:
+          type: string
+          title: Name
+        email:
+          type: string
+          format: email
+          title: Email
+        avatar:
+          type: integer
+          title: Avatar
+      type: object
+      required:
+      - id
+      - username
+      - name
+      - email
+      - avatar
+      title: GetUserSchema
+    HTTPValidationError:
+      properties:
+        detail:
+          items:
+            $ref: '#/components/schemas/ValidationError'
+          type: array
+          title: Detail
+      type: object
+      title: HTTPValidationError
+    Message:
+      properties:
+        message:
+          type: string
+          title: Message
+      type: object
+      required:
+      - message
+      title: Message
+    PatchUserSchema:
+      properties:
+        name:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Name
+        avatar:
+          anyOf:
+          - type: integer
+          - type: 'null'
+          title: Avatar
+        password:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Password
+      type: object
+      title: PatchUserSchema
+    ShowMediaInListSchema:
+      properties:
+        id:
+          type: integer
+          title: Id
+        title:
+          type: string
+          title: Title
+        poster_url:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Poster Url
+      type: object
+      required:
+      - id
+      - title
+      - poster_url
+      title: ShowMediaInListSchema
+    ShowMediasInListSchema:
+      properties:
+        medias:
+          items:
+            $ref: '#/components/schemas/ShowMediaInListSchema'
+          type: array
+          title: Medias
+      type: object
+      required:
+      - medias
+      title: ShowMediasInListSchema
+    Token:
+      properties:
+        access_token:
+          type: string
+          title: Access Token
+        token_type:
+          type: string
+          title: Token Type
+        user:
+          $ref: '#/components/schemas/TokentUserSchema'
+      type: object
+      required:
+      - access_token
+      - token_type
+      - user
+      title: Token
+    TokentUserSchema:
+      properties:
+        id:
+          type: integer
+          title: Id
+        name:
+          type: string
+          title: Name
+        email:
+          type: string
+          format: email
+          title: Email
+        avatar:
+          type: integer
+          title: Avatar
+      type: object
+      required:
+      - id
+      - name
+      - email
+      - avatar
+      title: TokentUserSchema
+    ValidationError:
+      properties:
+        loc:
+          items:
+            anyOf:
+            - type: string
+            - type: integer
+          type: array
+          title: Location
+        msg:
+          type: string
+          title: Message
+        type:
+          type: string
+          title: Error Type
+      type: object
+      required:
+      - loc
+      - msg
+      - type
+      title: ValidationError
+  securitySchemes:
+    OAuth2PasswordBearer:
+      type: oauth2
+      flows:
+        password:
+          scopes: {}
+          tokenUrl: auth/token

@@ -1,11 +1,24 @@
-schemaVersion: "1.2"
+# +required The configuration file schema version
+schemaVersion: 1.2
+
+# +optional Incoming connection details for the component
 endpoints:
-    - name: rest-api-be2
-      displayName: REST API
-      service:
-        basePath: /
-        port: 8000
-      type: REST
-      networkVisibilities:
-        - Project
-        - Public
+  # +required Unique name for the endpoint.
+  - name: watchhive_backend_api
+    # +optional Display name for the endpoint.
+    displayName: Watchhive Backend API
+    service:
+      # +optional Base path of the API that gets exposed via the endpoint.
+      # Se você quiser usar o caminho completo (watchhive/watchhive-backend/v1.0), 
+      # a configuração de contexto pode ser no painel do Choreo. 
+      # Aqui, geralmente deixamos "/" e o Choreo cuida do resto do prefixo.
+      basePath: /
+      # +required A porta DEVE ser 8000, correspondendo ao seu uvicorn no entrypoint.sh
+      port: 8000 
+    # +required Type of traffic that the endpoint is accepting.
+    type: REST
+    # +optional Network level visibilities of the endpoint.
+    networkVisibilities:
+      - Public # Permite acesso externo/Frontend
+    
+    schemaFilePath: openapi.yaml 
