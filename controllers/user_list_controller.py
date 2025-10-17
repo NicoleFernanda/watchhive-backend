@@ -150,7 +150,9 @@ async def existing_media_in_list(user_id: int, media_id: int, list_type: ListTyp
 
 
 async def get_all_media_from_user_list(
-    user_id: int, 
+    user_id: int,
+    limit: int,
+    offset: int,
     list_type: ListType, 
     session: AsyncSession
 ):
@@ -180,8 +182,8 @@ async def get_all_media_from_user_list(
         select(Media)
             .join(UserListMedia)
             .where(UserListMedia.user_list_id == list.id)
-            .order_by(func.random()
-        )
+            .limit(limit)
+            .offset(offset)
     )
     
     return media_list

@@ -1,7 +1,7 @@
 from http import HTTPStatus
 from typing import Annotated
 
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, Query
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from controllers.user_list_controller import add_to_list_to_watch, get_all_media_from_user_list, remove_from_list_to_watch
@@ -10,7 +10,7 @@ from exceptions.business_error import BusinessError
 from exceptions.record_not_found_error import RecordNotFoundError
 from models.user_list_model import ListType
 from models.user_model import User
-from schemas.commons_schemas import Message
+from schemas.commons_schemas import FilterPage, Message
 from schemas.media_schemas import ShowMediasInListSchema
 from security import get_current_user
 
@@ -67,13 +67,15 @@ async def get_watch(current_user: CurrentUser, session: Session):
     
 
 @user_list_router.get('/lists/watched', response_model=ShowMediasInListSchema)
-async def get_watched(current_user: CurrentUser, session: Session):
+async def get_watched(current_user: CurrentUser, session: Session, filter_page: Annotated[FilterPage, Query()],):
 
     try:
         medias = await get_all_media_from_user_list(
             user_id=current_user.id,
             list_type=ListType.WATCHED,
             session=session,
+            limit=filter_page.limit,
+            offset=filter_page.offset
         )
 
         return {'medias': medias}
