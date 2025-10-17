@@ -1,6 +1,6 @@
 from typing import List
 
-from sqlalchemy import func, select
+from sqlalchemy import desc, func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
 
@@ -102,7 +102,19 @@ async def show_medias_by_genre_page(
         limit (int): Número máximo de registros a retornar (paginação).
     """
 
-    medias = await get_random_medias(genre_id, movie, session, limit, offset)
+    media_type = 'filme' if movie else 'série'
+
+    medias = await session.scalars(
+        select(Media)
+        .join(Media.genres)
+        .where(
+            Genre.id == genre_id,  # Filtra pelo gênero
+            Media.media_type == media_type  # Filtra pelo tipo ('filme' ou 'série')
+        )
+        .order_by(desc(Media.popularity))
+        .limit(limit)
+        .offset(offset)
+    )
 
     return medias
 
