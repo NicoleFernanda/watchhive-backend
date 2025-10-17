@@ -33,11 +33,27 @@ class CreateForumGroupSchema(BaseModel):
     content: str
 
 
-class GetForumGroupSchema(CreateForumGroupSchema):
+class GetForumGroupFullSchema(CreateForumGroupSchema):
     id: int
     user_id: int
+    title: str
+    content: str
     messages: list[GetForumMessageSchema]
     participants: list[GetForumParticipantSchema]
+
+    class Config:
+        from_attributes = True
+
+
+class GetForumGroupFullListSchema(BaseModel):
+    groups: list[GetForumGroupFullSchema]
+
+
+class GetForumGroupSchema(BaseModel):
+    id: int
+    user_id: int
+    title: str
+    content: str
 
     class Config:
         from_attributes = True

@@ -4,7 +4,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from controllers.forum_group_controller import existing_forum_group
 from exceptions.permission_error import PermissionError
 from exceptions.record_not_found_error import RecordNotFoundError
-from models.forum_comment_model import ForumMessage
+from models.forum_message_model import ForumMessage
 from models.forum_participant_model import ForumParticipant
 
 

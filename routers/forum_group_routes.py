@@ -11,12 +11,13 @@ from controllers.forum_group_controller import (
     read_forum_group,
     update_forum_group,
 )
+from controllers.forum_participant_controller import get_created_forums, get_participating_forums
 from database import get_session
 from exceptions.permission_error import PermissionError
 from exceptions.record_not_found_error import RecordNotFoundError
 from models.user_model import User
 from schemas.commons_schemas import Message
-from schemas.forum_schemas import CreateForumGroupFullSchema, CreateForumGroupSchema, GetForumGroupSchema
+from schemas.forum_schemas import CreateForumGroupFullSchema, CreateForumGroupSchema, GetForumGroupFullSchema, GetForumGroupListSchema
 from security import get_current_user
 
 forum_group_router = APIRouter(prefix="/forum_groups", tags=['forum_groups'])
@@ -24,7 +25,7 @@ Session = Annotated[AsyncSession, Depends(get_session)]
 CurrentUser = Annotated[User, Depends(get_current_user)]
 
 
-@forum_group_router.post('/', status_code=HTTPStatus.CREATED, response_model=GetForumGroupSchema)
+@forum_group_router.post('/', status_code=HTTPStatus.CREATED, response_model=GetForumGroupFullSchema)
 async def create(group: CreateForumGroupSchema, current_user: CurrentUser, session: Session):
 
     return await create_forum_group(
@@ -35,7 +36,7 @@ async def create(group: CreateForumGroupSchema, current_user: CurrentUser, sessi
     )
 
 
-@forum_group_router.post('/full', status_code=HTTPStatus.CREATED, response_model=GetForumGroupSchema)
+@forum_group_router.post('/full', status_code=HTTPStatus.CREATED, response_model=GetForumGroupFullSchema)
 async def create_full(group: CreateForumGroupFullSchema, current_user: CurrentUser, session: Session):
 
     participant_ids: List[int] = [p.user_id for p in group.participants]
@@ -48,8 +49,39 @@ async def create_full(group: CreateForumGroupFullSchema, current_user: CurrentUs
         session=session
     )
 
+@forum_group_router.get('/created', response_model=GetForumGroupListSchema)
+async def read_creator_groups(
+    session: Session,
+    current_user: CurrentUser
+):
+    try:
+        forums = await get_created_forums(
+            user_id=current_user.id,
+            session=session,
+        )
 
-@forum_group_router.put('/{forum_group_id}', status_code=HTTPStatus.OK, response_model=GetForumGroupSchema)
+        return {'groups' : forums}
+    except RecordNotFoundError as u:
+        raise HTTPException(status_code=HTTPStatus.NOT_FOUND, detail=str(u))
+    
+
+@forum_group_router.get('/participating', response_model=GetForumGroupListSchema)
+async def read_participating_groups(
+    session: Session,
+    current_user: CurrentUser
+):
+    try:
+        forums = await get_participating_forums(
+            user_id=current_user.id,
+            session=session,
+        )
+
+        return {'groups' : forums}
+    except RecordNotFoundError as u:
+        raise HTTPException(status_code=HTTPStatus.NOT_FOUND, detail=str(u))
+
+
+@forum_group_router.put('/{forum_group_id}', status_code=HTTPStatus.OK, response_model=GetForumGroupFullSchema)
 async def update(
     forum_group_id: int,
     forum_group: CreateForumGroupSchema,
@@ -89,7 +121,7 @@ async def delete(
         raise HTTPException(status_code=HTTPStatus.NOT_FOUND, detail=str(u))
 
 
-@forum_group_router.get('/{forum_group_id}', response_model=GetForumGroupSchema)
+@forum_group_router.get('/{forum_group_id}', response_model=GetForumGroupFullSchema)
 async def read(
     forum_group_id: int,
     session: Session,

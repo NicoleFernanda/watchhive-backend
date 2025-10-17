@@ -4,7 +4,7 @@ from models.user_model import User
 from models.follows_model import Follows
 from models.forum_participant_model import ForumParticipant
 from models.forum_group_model import ForumGroup
-from models.forum_comment_model import ForumMessage
+from models.forum_message_model import ForumMessage
 from models.media_model import Genre, Media
 from models.media_comment_model import MediaComment
 from models.user_list_model import UserList, UserListMedia

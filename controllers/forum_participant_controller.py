@@ -1,3 +1,4 @@
+from typing import List
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -102,3 +103,39 @@ async def existing_forum_participant(id_forum_group: int, id_participant: int, s
         return None
 
     return existing_participant
+
+
+async def get_created_forums(user_id: int, session: AsyncSession) -> List[ForumGroup]:
+    """
+    Busca os grupos de fórum criados por um usuário específico.
+
+    Args:
+        user_id (int): usuário logado.
+        session (AsyncSession): sessão ativa do banco.
+    """
+
+    stmt = select(ForumGroup).where(ForumGroup.user_id == user_id)
+    result = await session.execute(stmt)
+    return result.scalars().all()
+
+
+async def get_participating_forums(session: AsyncSession, user_id: int) -> List[ForumGroup]:
+    """
+    Busca os grupos de fórum em que o usuário participa, excluindo aqueles que ele criou.
+
+    Args:
+        user_id (int): usuário logado.
+        session (AsyncSession): sessão ativa do banco.
+    """
+
+    stmt = (
+        select(ForumGroup)
+        .join(ForumParticipant, ForumGroup.id == ForumParticipant.forum_group_id)
+        .where(
+            ForumParticipant.user_id == user_id,
+            ForumGroup.user_id != user_id
+        )
+    )
+    
+    result = await session.execute(stmt)
+    return result.scalars().unique().all()
