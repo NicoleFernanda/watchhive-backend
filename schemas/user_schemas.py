@@ -1,5 +1,7 @@
 from pydantic import BaseModel, ConfigDict, EmailStr
 
+from schemas.media_schemas import GetPublicCommentSchema
+
 
 class CreateUserSchema(BaseModel):
     name: str
@@ -35,3 +37,13 @@ class TokentUserSchema(BaseModel):
     avatar: int
 
     model_config = ConfigDict(from_attributes=True)
+
+class GetPublicUserSchema(BaseModel):
+    id: int
+    avatar: int
+    name: str
+    username: str
+    following: bool
+    total_reviews: int
+    total_comments: int
+    latest_comments: list[GetPublicCommentSchema]

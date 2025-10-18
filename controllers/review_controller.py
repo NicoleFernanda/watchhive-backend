@@ -4,6 +4,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from controllers.media_controller import existing_media
 from controllers.user_list_controller import add_to_list_to_watched
 from exceptions.business_error import BusinessError
+from exceptions.record_not_found_error import RecordNotFoundError
 from models.media_model import Media
 from models.review_model import Review
 
@@ -28,19 +29,46 @@ async def create_review(media_id: int, user_id: int, score: int, session: AsyncS
     review = await existing_review(user_id, media_id, session)
 
     if review:
-        review.score = score
+        raise BusinessError('Usuário já avaliou está mídia.')
 
-    else:
-        # create review
-        review = Review(
-            user_id=user_id,
-            media_id=media_id,
-            score=score
-        )
+    review = Review(
+        user_id=user_id,
+        media_id=media_id,
+        score=score
+    )
 
-        session.add(review)
-        await add_to_list_to_watched(user_id, media_id, session)
+    session.add(review)
+    await add_to_list_to_watched(user_id, media_id, session)
 
+    await session.commit()
+    await session.refresh(review)
+
+    return review
+
+
+async def update_review(media_id: int, user_id: int, score: int, session: AsyncSession) -> Media:
+    """
+    Método responsável por atualizar um review.
+
+    Args:
+        media_id (int): id do filme ou série.
+        user_id (int): id do usuário ativo.
+
+        session (AsyncSession): sessão ativa do banco.
+
+    Raises:
+        RecordNotFoundError: caso a mídia pesquisada não seja encontrada.
+    """
+    media = await existing_media(media_id, session)
+
+    check_score_value(score)
+
+    review = await existing_review(user_id, media_id, session)
+
+    if not review:
+        raise RecordNotFoundError("Avaliação não encontrada.")
+
+    review.score = score
     await session.commit()
     await session.refresh(review)
 

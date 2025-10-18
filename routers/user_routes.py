@@ -4,14 +4,14 @@ from typing import Annotated
 from fastapi import APIRouter, Depends, HTTPException, Query
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from controllers.user_controller import create_user, delete_user, get_all_users, get_user, patch_user, search_users_by_term, update_user
+from controllers.user_controller import create_user, delete_user, get_all_users, get_public_user_profile, get_user, patch_user, search_users_by_term, update_user
 from database import get_session
 from exceptions.business_error import BusinessError
 from exceptions.permission_error import PermissionError
 from exceptions.record_not_found_error import RecordNotFoundError
 from models.user_model import User
 from schemas.commons_schemas import FilterPage, Message
-from schemas.user_schemas import CreateUserSchema, GetUserListSchema, GetUserSchema, PatchUserSchema
+from schemas.user_schemas import CreateUserSchema, GetPublicUserSchema, GetUserListSchema, GetUserSchema, PatchUserSchema
 from security import get_current_user
 
 user_router = APIRouter(prefix="/users", tags=['users'])
@@ -35,7 +35,7 @@ async def create(user: CreateUserSchema, session: Session):
 
 
 @user_router.get('/me', response_model=GetUserSchema)
-async def read_user(
+async def read_user_me(
     current_user: CurrentUser,
     session: Session,
 ):
@@ -64,7 +64,7 @@ async def read_all(
 
 
 @user_router.get('/search', response_model=GetUserListSchema)
-async def search_media(
+async def search_user(
     current_user: CurrentUser,
     session: Session,
     term: str = Query(None, description="Termo de pesquisa para nome ou username do usuário."),
@@ -117,21 +117,6 @@ async def delete(
         raise HTTPException(status_code=HTTPStatus.FORBIDDEN, detail=str(p))
 
 
-@user_router.get('/{user_id}', response_model=GetUserSchema)
-async def read_user(
-    user_id: int,
-    session: Session,
-):
-    # TODO AAA: adicionar permissão para pesquisar usuários também kk
-    try:
-        return await get_user(
-            user_id=user_id,
-            session=session,
-        )
-    except RecordNotFoundError as u:
-        raise HTTPException(status_code=HTTPStatus.NOT_FOUND, detail=str(u))
-
-
 @user_router.patch('/', status_code=HTTPStatus.OK, response_model=GetUserSchema)
 async def patch(
     user: PatchUserSchema,
@@ -146,3 +131,21 @@ async def patch(
         avatar=user.avatar,
         session=session,
     )
+
+
+@user_router.get("/{target_user_id}", response_model=GetPublicUserSchema)
+async def read_user(
+    target_user_id: int, 
+    current_user: CurrentUser,
+    session: Session,
+):
+    try:
+        profile = await get_public_user_profile(
+            session,
+            target_user_id=target_user_id, 
+            current_user_id=current_user.id
+        )
+
+        return profile
+    except RecordNotFoundError as p:
+        raise HTTPException(status_code=HTTPStatus.NOT_FOUND, detail=str(p))

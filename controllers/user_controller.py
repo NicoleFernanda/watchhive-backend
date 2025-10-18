@@ -9,6 +9,10 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from exceptions.business_error import BusinessError
 from exceptions.permission_error import PermissionError
 from exceptions.record_not_found_error import RecordNotFoundError
+from models.follows_model import Follows
+from models.media_comment_model import MediaComment
+from models.media_model import Media
+from models.review_model import Review
 from models.user_list_model import ListType, UserList
 from models.user_model import User
 from security import get_password_hash
@@ -268,6 +272,72 @@ async def search_users_by_term(
     users = await session.scalars(stmt)
 
     return users
+
+
+from sqlalchemy import select, func, and_
+from sqlalchemy.orm import aliased
+from sqlalchemy.ext.asyncio import AsyncSession
+from typing import Dict, Any, List
+
+# ... (Seus modelos User, Review, Follows, MediaComment, Media, UserListMedia)
+
+async def get_public_user_profile(
+    session: AsyncSession, 
+    target_user_id: int, 
+    current_user_id: int
+) -> Dict[str, Any]:
+
+    # dados do usuário
+    Follows_as_Follower = aliased(Follows)
+    
+    stmt_main = select(
+        User.id,
+        User.avatar,
+        User.name,
+        User.username,
+        func.count(Review.id).filter(Review.user_id == target_user_id).label("total_reviews"),
+        func.count(MediaComment.id).filter(MediaComment.user_id == target_user_id).label("total_comments"),
+        func.count(Follows_as_Follower.follower_id).filter(
+            and_(
+                Follows_as_Follower.follower_id == current_user_id,
+                Follows_as_Follower.followed_id == target_user_id
+            )
+        ).label("is_following")
+    ).outerjoin(Review, Review.user_id == User.id) \
+    .outerjoin(MediaComment, MediaComment.user_id == User.id) \
+    .outerjoin(Follows_as_Follower, Follows_as_Follower.followed_id == User.id) \
+    .where(User.id == target_user_id) \
+    .group_by(User.id)
+
+    result_main = await session.execute(stmt_main)
+    
+    main_data = result_main.mappings().first()
+        
+    profile_data = dict(main_data)
+    
+    # preciso ajustar para boolean
+    profile_data["following"] = profile_data.pop("is_following") > 0
+    
+    # ultimos 5 comentários
+    
+    stmt_comments = select(
+        MediaComment.content,
+        MediaComment.created_at,
+        Media.id.label("media_id"),
+        Media.title.label("media_title"),
+        Media.poster_url.label("media_poster_url")
+    ).join(Media, Media.id == MediaComment.media_id) \
+    .where(MediaComment.user_id == target_user_id) \
+    .order_by(MediaComment.created_at.desc()) \
+    .limit(5)
+    
+    result_comments = await session.execute(stmt_comments)
+    
+    profile_data["latest_comments"] = [
+        dict(row) for row in result_comments.mappings()
+    ]
+    
+    return profile_data
 
 
 async def create_unique_username(session: AsyncSession, name: str) -> str:
