@@ -1,4 +1,4 @@
-from sqlalchemy import delete, func, select
+from sqlalchemy import delete, select
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -77,7 +77,7 @@ async def add_to_list_to_watched(user_id: int, media_id: int, session: AsyncSess
 
     except IntegrityError:
         raise BusinessError('Título já adicionado a lista.')
-    
+
 
 async def remove_from_list_to_watch(user_id: int, media_id: int, session: AsyncSession):
     """
@@ -104,18 +104,18 @@ async def remove_from_list_to_watch(user_id: int, media_id: int, session: AsyncS
     is_media_in_list = await existing_media_in_list(user_id, media_id, ListType.TO_WATCH, session)
 
     if is_media_in_list:
-        
+
         stmt_delete = delete(UserListMedia).where(
             UserListMedia.user_list_id == list.id,
             UserListMedia.media_id == media_id
         )
-        
+
         await session.execute(stmt_delete)
         await session.commit()
         await session.refresh(list)
-        
+
         return {"message": "Título removido com sucesso."}
-    
+
     raise RecordNotFoundError('Título não encontrado na sua lista "Quero Assistir".')
 
 
@@ -153,7 +153,7 @@ async def get_all_media_from_user_list(
     user_id: int,
     limit: int,
     offset: int,
-    list_type: ListType, 
+    list_type: ListType,
     session: AsyncSession
 ):
     """
@@ -170,7 +170,7 @@ async def get_all_media_from_user_list(
     Raises:
         RecordNotFoundError: Se a lista do usuário não for encontrada.
     """
-    
+
     list = await session.scalar(
         select(UserList).where(
             UserList.user_id == user_id,
@@ -185,5 +185,5 @@ async def get_all_media_from_user_list(
             .limit(limit)
             .offset(offset)
     )
-    
+
     return media_list

@@ -4,8 +4,8 @@ import pytest
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from models.forum_message_model import ForumMessage
 from models.forum_group_model import ForumGroup
+from models.forum_message_model import ForumMessage
 
 
 @pytest.mark.asyncio

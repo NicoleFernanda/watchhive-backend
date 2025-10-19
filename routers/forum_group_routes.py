@@ -17,7 +17,12 @@ from exceptions.permission_error import PermissionError
 from exceptions.record_not_found_error import RecordNotFoundError
 from models.user_model import User
 from schemas.commons_schemas import Message
-from schemas.forum_schemas import CreateForumGroupFullSchema, CreateForumGroupSchema, GetForumGroupFullSchema, GetForumGroupListSchema
+from schemas.forum_schemas import (
+    CreateForumGroupFullSchema,
+    CreateForumGroupSchema,
+    GetForumGroupFullSchema,
+    GetForumGroupListSchema,
+)
 from security import get_current_user
 
 forum_group_router = APIRouter(prefix="/forum_groups", tags=['forum_groups'])
@@ -49,6 +54,7 @@ async def create_full(group: CreateForumGroupFullSchema, current_user: CurrentUs
         session=session
     )
 
+
 @forum_group_router.get('/created', response_model=GetForumGroupListSchema)
 async def read_creator_groups(
     session: Session,
@@ -60,10 +66,10 @@ async def read_creator_groups(
             session=session,
         )
 
-        return {'groups' : forums}
+        return {'groups': forums}
     except RecordNotFoundError as u:
         raise HTTPException(status_code=HTTPStatus.NOT_FOUND, detail=str(u))
-    
+
 
 @forum_group_router.get('/participating', response_model=GetForumGroupListSchema)
 async def read_participating_groups(
@@ -76,7 +82,7 @@ async def read_participating_groups(
             session=session,
         )
 
-        return {'groups' : forums}
+        return {'groups': forums}
     except RecordNotFoundError as u:
         raise HTTPException(status_code=HTTPStatus.NOT_FOUND, detail=str(u))
 

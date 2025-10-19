@@ -4,7 +4,11 @@ from typing import Annotated
 from fastapi import APIRouter, Depends, HTTPException, Query
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from controllers.user_list_controller import add_to_list_to_watch, get_all_media_from_user_list, remove_from_list_to_watch
+from controllers.user_list_controller import (
+    add_to_list_to_watch,
+    get_all_media_from_user_list,
+    remove_from_list_to_watch,
+)
 from database import get_session
 from exceptions.business_error import BusinessError
 from exceptions.record_not_found_error import RecordNotFoundError
@@ -34,7 +38,7 @@ async def create(media_id: int, current_user: CurrentUser, session: Session):
         raise HTTPException(status_code=HTTPStatus.CONFLICT, detail=str(u))
     except RecordNotFoundError as r:
         raise HTTPException(status_code=HTTPStatus.NOT_FOUND, detail=str(r))
-    
+
 
 @user_list_router.delete('/{media_id}/lists/to-watch', response_model=Message)
 async def delete(media_id: int, current_user: CurrentUser, session: Session):
@@ -64,7 +68,7 @@ async def get_watch(current_user: CurrentUser, session: Session):
         return {'medias': medias}
     except RecordNotFoundError as r:
         raise HTTPException(status_code=HTTPStatus.NOT_FOUND, detail=str(r))
-    
+
 
 @user_list_router.get('/lists/watched', response_model=ShowMediasInListSchema)
 async def get_watched(current_user: CurrentUser, session: Session, filter_page: Annotated[FilterPage, Query()],):

@@ -1,4 +1,5 @@
 from typing import List
+
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -136,6 +137,6 @@ async def get_participating_forums(session: AsyncSession, user_id: int) -> List[
             ForumGroup.user_id != user_id
         )
     )
-    
+
     result = await session.execute(stmt)
     return result.scalars().unique().all()

@@ -2,7 +2,7 @@ import re
 from typing import Any, Dict, List
 
 from fastapi.concurrency import run_in_threadpool
-from sqlalchemy import and_, func, or_, select, update
+from sqlalchemy import and_, func, or_, select
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -275,14 +275,14 @@ async def search_users_by_term(
 
 
 async def get_public_user_profile(
-    session: AsyncSession, 
-    target_user_id: int, 
+    session: AsyncSession,
+    target_user_id: int,
     current_user_id: int
 ) -> Dict[str, Any]:
-    
+
     # checa se usuário existe
     existing_user(target_user_id, session)
-    
+
     # quantidade de reviews
     sub_reviews = select(func.count(Review.id)).where(Review.user_id == target_user_id).scalar_subquery()
 
@@ -309,14 +309,14 @@ async def get_public_user_profile(
     ).where(User.id == target_user_id)
 
     result_main = await session.execute(stmt_main)
-    
+
     main_data = result_main.mappings().first()
-    
+
     profile_data = dict(main_data)
-    
+
     # preciso ajustar para boolean
     profile_data["following"] = profile_data.pop("is_following") > 0
-    
+
     # ultimos 5 comentários
     stmt_comments = select(
         MediaComment.content,
@@ -328,13 +328,13 @@ async def get_public_user_profile(
     .where(MediaComment.user_id == target_user_id) \
     .order_by(MediaComment.created_at.desc()) \
     .limit(5)
-    
+
     result_comments = await session.execute(stmt_comments)
-    
+
     profile_data["latest_comments"] = [
         dict(row) for row in result_comments.mappings()
     ]
-    
+
     return profile_data
 
 

@@ -38,6 +38,7 @@ class TokentUserSchema(BaseModel):
 
     model_config = ConfigDict(from_attributes=True)
 
+
 class GetPublicUserSchema(BaseModel):
     id: int
     avatar: int

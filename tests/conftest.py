@@ -11,8 +11,8 @@ from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine
 from database import get_session
 from main import app
 from models.base import Base
-from models.forum_message_model import ForumMessage
 from models.forum_group_model import ForumGroup
+from models.forum_message_model import ForumMessage
 from models.forum_participant_model import ForumParticipant
 from models.media_comment_model import MediaComment
 from models.media_model import Media

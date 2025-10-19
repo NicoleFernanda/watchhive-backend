@@ -4,14 +4,29 @@ from typing import Annotated
 from fastapi import APIRouter, Depends, HTTPException, Query
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from controllers.user_controller import create_user, delete_user, get_all_users, get_public_user_profile, get_user, patch_user, search_users_by_term, update_user
+from controllers.user_controller import (
+    create_user,
+    delete_user,
+    get_all_users,
+    get_public_user_profile,
+    get_user,
+    patch_user,
+    search_users_by_term,
+    update_user,
+)
 from database import get_session
 from exceptions.business_error import BusinessError
 from exceptions.permission_error import PermissionError
 from exceptions.record_not_found_error import RecordNotFoundError
 from models.user_model import User
 from schemas.commons_schemas import FilterPage, Message
-from schemas.user_schemas import CreateUserSchema, GetPublicUserSchema, GetUserListSchema, GetUserSchema, PatchUserSchema
+from schemas.user_schemas import (
+    CreateUserSchema,
+    GetPublicUserSchema,
+    GetUserListSchema,
+    GetUserSchema,
+    PatchUserSchema,
+)
 from security import get_current_user
 
 user_router = APIRouter(prefix="/users", tags=['users'])
@@ -135,14 +150,14 @@ async def patch(
 
 @user_router.get("/{target_user_id}", response_model=GetPublicUserSchema)
 async def read_user(
-    target_user_id: int, 
+    target_user_id: int,
     current_user: CurrentUser,
     session: Session,
 ):
     try:
         profile = await get_public_user_profile(
             session,
-            target_user_id=target_user_id, 
+            target_user_id=target_user_id,
             current_user_id=current_user.id
         )
 
