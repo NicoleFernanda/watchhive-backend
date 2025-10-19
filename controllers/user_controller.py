@@ -1,8 +1,8 @@
 import re
-from typing import List
+from typing import Any, Dict, List
 
 from fastapi.concurrency import run_in_threadpool
-from sqlalchemy import or_, select, update
+from sqlalchemy import and_, func, or_, select, update
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -274,52 +274,50 @@ async def search_users_by_term(
     return users
 
 
-from sqlalchemy import select, func, and_
-from sqlalchemy.orm import aliased
-from sqlalchemy.ext.asyncio import AsyncSession
-from typing import Dict, Any, List
-
-# ... (Seus modelos User, Review, Follows, MediaComment, Media, UserListMedia)
-
 async def get_public_user_profile(
     session: AsyncSession, 
     target_user_id: int, 
     current_user_id: int
 ) -> Dict[str, Any]:
-
-    # dados do usuário
-    Follows_as_Follower = aliased(Follows)
     
+    # checa se usuário existe
+    existing_user(target_user_id, session)
+    
+    # quantidade de reviews
+    sub_reviews = select(func.count(Review.id)).where(Review.user_id == target_user_id).scalar_subquery()
+
+    # qauntidade de comentarios
+    sub_comments = select(func.count(MediaComment.id)).where(MediaComment.user_id == target_user_id).scalar_subquery()
+
+    # checa se segue (following)
+    sub_following = select(func.count()).select_from(Follows).where(
+        and_(
+            Follows.follower_id == current_user_id,
+            Follows.followed_id == target_user_id
+        )
+    ).scalar_subquery()
+
+    # pesquisa principal
     stmt_main = select(
         User.id,
         User.avatar,
         User.name,
         User.username,
-        func.count(Review.id).filter(Review.user_id == target_user_id).label("total_reviews"),
-        func.count(MediaComment.id).filter(MediaComment.user_id == target_user_id).label("total_comments"),
-        func.count(Follows_as_Follower.follower_id).filter(
-            and_(
-                Follows_as_Follower.follower_id == current_user_id,
-                Follows_as_Follower.followed_id == target_user_id
-            )
-        ).label("is_following")
-    ).outerjoin(Review, Review.user_id == User.id) \
-    .outerjoin(MediaComment, MediaComment.user_id == User.id) \
-    .outerjoin(Follows_as_Follower, Follows_as_Follower.followed_id == User.id) \
-    .where(User.id == target_user_id) \
-    .group_by(User.id)
+        sub_reviews.label("total_reviews"),
+        sub_comments.label("total_comments"),
+        sub_following.label("is_following")
+    ).where(User.id == target_user_id)
 
     result_main = await session.execute(stmt_main)
     
     main_data = result_main.mappings().first()
-        
+    
     profile_data = dict(main_data)
     
     # preciso ajustar para boolean
     profile_data["following"] = profile_data.pop("is_following") > 0
     
     # ultimos 5 comentários
-    
     stmt_comments = select(
         MediaComment.content,
         MediaComment.created_at,
