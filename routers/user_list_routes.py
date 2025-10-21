@@ -56,18 +56,22 @@ async def delete(media_id: int, current_user: CurrentUser, session: Session):
 
 
 @user_list_router.get('/lists/to-watch', response_model=ShowMediasInListSchema)
-async def get_watch(current_user: CurrentUser, session: Session):
+async def get_watch(current_user: CurrentUser, filter_page: Annotated[FilterPage, Query()], session: Session):
 
     try:
         medias = await get_all_media_from_user_list(
             user_id=current_user.id,
             list_type=ListType.TO_WATCH,
             session=session,
+            limit=filter_page.limit,
+            offset=filter_page.offset
         )
 
         return {'medias': medias}
     except RecordNotFoundError as r:
         raise HTTPException(status_code=HTTPStatus.NOT_FOUND, detail=str(r))
+    except Exception as e:
+        raise HTTPException(status_code=HTTPStatus.INTERNAL_SERVER_ERROR, detail=str(e))
 
 
 @user_list_router.get('/lists/watched', response_model=ShowMediasInListSchema)
@@ -85,3 +89,5 @@ async def get_watched(current_user: CurrentUser, session: Session, filter_page: 
         return {'medias': medias}
     except RecordNotFoundError as r:
         raise HTTPException(status_code=HTTPStatus.NOT_FOUND, detail=str(r))
+    except Exception as e:
+        raise HTTPException(status_code=HTTPStatus.INTERNAL_SERVER_ERROR, detail=str(e))

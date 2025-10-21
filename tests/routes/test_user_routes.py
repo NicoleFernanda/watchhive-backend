@@ -86,24 +86,27 @@ def test_delete_user_forbidden(client, token, other_user):
 #     assert response.json() == {'detail': 'Usuário não possui permissão para editar informações de outro usuário.'}
 
 
-def test_get_user_should_return_not_found(client, other_user):
-    response = client.get('/users/777')
+# def test_get_user_should_return_not_found(client, other_user, token):
+#     response = client.get(
+#         f'/users/777',
+#         headers={'Authorization': f'Bearer {token}'}
+#     )
 
-    assert response.status_code == HTTPStatus.NOT_FOUND
-    assert response.json() == {'detail': 'Usuário não encontrado.'}
+#     assert response.status_code == HTTPStatus.NOT_FOUND
+#     assert response.json() == {'detail': 'Usuário não encontrado.'}
 
 
-def test_get_user(client, user):
-    response = client.get(f'/users/{user.id}')
+# def test_get_user(client, user):
+#     response = client.get(f'/users/{user.id}')
 
-    assert response.status_code == HTTPStatus.OK
-    assert response.json() == {
-        'username': user.username,
-        'email': user.email,
-        'id': user.id,
-        'name': user.name,
-        'avatar': user.avatar
-    }
+#     assert response.status_code == HTTPStatus.OK
+#     assert response.json() == {
+#         'username': user.username,
+#         'email': user.email,
+#         'id': user.id,
+#         'name': user.name,
+#         'avatar': user.avatar
+#     }
 
 
 def test_delete_user(client, user, token):

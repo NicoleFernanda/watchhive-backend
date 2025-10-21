@@ -88,6 +88,7 @@ async def read_media(
     try:
         return await get_media(
             media_id=media_id,
+            current_user_id=current_user.id,
             session=session,
         )
     except RecordNotFoundError as u:

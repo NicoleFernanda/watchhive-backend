@@ -23,6 +23,16 @@ async def follow_user(current_user_id: int, user_to_follow_id: int, session: Asy
 
     await existing_user(user_to_follow_id, session)
 
+    already_follows = await session.scalar(
+        select(Follows).where(
+            Follows.follower_id == current_user_id,
+            Follows.followed_id == user_to_follow_id
+        )
+    )
+
+    if already_follows:
+        raise BusinessError("Você já segue este usuário.")
+
     follow = Follows(
         followed_id=user_to_follow_id,
         follower_id=current_user_id

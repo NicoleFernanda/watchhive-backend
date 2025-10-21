@@ -2,9 +2,9 @@ from datetime import datetime, timedelta
 from http import HTTPStatus
 from zoneinfo import ZoneInfo
 
-from fastapi import Depends, HTTPException
+from fastapi import Depends, HTTPException, Request
 from fastapi.security import OAuth2PasswordBearer
-from jwt import DecodeError, ExpiredSignatureError, decode, encode
+from jwt import DecodeError, ExpiredSignatureError, decode, encode, PyJWTError
 from pwdlib import PasswordHash
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -65,6 +65,7 @@ def verify_password(plain_password: str, hashed_password: str) -> bool:
 
 
 async def get_current_user(
+    request: Request,
     session: AsyncSession = Depends(get_session),
     token: str = Depends(oauth2_scheme),
 ):
@@ -72,6 +73,7 @@ async def get_current_user(
     Recupera o usuário autenticado a partir do token JWT.
 
     Args:
+        request (Request): Objeto da requisição HTTP (Adicionado para a correção do CORS)
         session (Session): Sessão do banco de dados.
         token (str): Token JWT obtido do cabeçalho de autorização.
 

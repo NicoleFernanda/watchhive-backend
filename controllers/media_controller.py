@@ -9,7 +9,7 @@ from models.media_model import Genre, Media
 from models.review_model import Review
 
 
-async def get_media(media_id: int, session: AsyncSession):
+async def get_media(media_id: int, current_user_id: int, session: AsyncSession):
     """
     Método retorna um post específico.
 
@@ -17,7 +17,7 @@ async def get_media(media_id: int, session: AsyncSession):
         media_id (int): id do filme ou série.
         session (AsyncSession): sessão ativa do banco de dados.
     """
-    return await existing_media(media_id, session)
+    return await existing_media(media_id, session, current_user_id)
 
 
 async def get_random_medias(genre_id: int, movie: bool, session: AsyncSession, limit: int = 20, offset: int = 0) -> List[Media]:
@@ -119,7 +119,7 @@ async def show_medias_by_genre_page(
     return medias
 
 
-async def existing_media(media_id: int, session: AsyncSession) -> Media:
+async def existing_media(media_id: int, session: AsyncSession, current_user_id: int = None,) -> Media:
     """
     Método responsável por validar se o filme ou série existe e, caso seja verdade, o retorne.
 
@@ -141,6 +141,14 @@ async def existing_media(media_id: int, session: AsyncSession) -> Media:
         raise RecordNotFoundError('Título não encontrado no WatchHive.')
 
     media.average_score = await get_average_score(media.id, session)
+
+    if current_user_id:
+        review = await session.scalar(
+            select(Review)
+            .where((Review.user_id == current_user_id) & (Review.media_id == media_id))
+        )
+
+        media.user_review = review.score if review else None
 
     return media
 

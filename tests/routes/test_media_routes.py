@@ -26,5 +26,6 @@ def test_read_media(client, user, token, media):
         "adult": media.adult,
         "genres": [],
         "comments": [],
-        "average_score": 0.0
+        "average_score": 0.0,
+        "user_review": None
     }
