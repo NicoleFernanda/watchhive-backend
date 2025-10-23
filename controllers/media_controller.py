@@ -7,6 +7,7 @@ from sqlalchemy.orm import selectinload
 from exceptions.record_not_found_error import RecordNotFoundError
 from models.media_model import Genre, Media
 from models.review_model import Review
+from models.user_list_model import ListType, UserList, UserListMedia
 
 
 async def get_media(media_id: int, current_user_id: int, session: AsyncSession):
@@ -149,6 +150,16 @@ async def existing_media(media_id: int, session: AsyncSession, current_user_id: 
             .where((Review.user_id == current_user_id) & (Review.media_id == media_id))
         )
 
+        media_in_list = await session.scalar(
+            select(UserListMedia)
+            .join(UserList, UserListMedia.user_list_id == UserList.id)
+            .where(
+                UserList.user_id == current_user_id,
+                UserList.name == ListType.TO_WATCH,
+                UserListMedia.media_id == media_id
+            )
+        )
+        media.to_watch_list = True if media_in_list else False
         media.user_review = review.score if review else None
 
     return media

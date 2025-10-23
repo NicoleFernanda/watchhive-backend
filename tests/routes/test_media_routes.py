@@ -28,5 +28,6 @@ def test_read_media(client, user, token, media):
         "comments": [],
         "average_score": 0.0,
         "user_review": None,
-        "vote_count": 0
+        "vote_count": 0,
+        "to_watch_list": False
     }

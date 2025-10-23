@@ -54,6 +54,8 @@ class GetMediaSchema(BaseModel):
 
     user_review: int | None = None
 
+    to_watch_list: bool
+
     model_config = ConfigDict(from_attributes=True)
 
 
