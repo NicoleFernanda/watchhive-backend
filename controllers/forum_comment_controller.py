@@ -8,7 +8,7 @@ from models.forum_message_model import ForumMessage
 from models.forum_participant_model import ForumParticipant
 
 
-async def create_forum_participant(id_forum_post: str, content: str, user_id: id, session: AsyncSession) -> ForumMessage:
+async def send_forum_message(id_forum_post: str, content: str, user_id: id, session: AsyncSession) -> ForumMessage:
     """
     Método para criação de um mensagem em um fórum watchhive, pegando o usuário logado.
 

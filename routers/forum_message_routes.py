@@ -4,7 +4,7 @@ from typing import Annotated
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from controllers.forum_comment_controller import create_forum_participant, delete_forum_message
+from controllers.forum_comment_controller import send_forum_message, delete_forum_message
 from database import get_session
 from exceptions.permission_error import PermissionError
 from exceptions.record_not_found_error import RecordNotFoundError
@@ -22,7 +22,7 @@ CurrentUser = Annotated[User, Depends(get_current_user)]
 async def create(id_forum_group: int, comment: CreateForumMessageSchema, current_user: CurrentUser, session: Session):
 
     try:
-        return await create_forum_participant(
+        return await send_forum_message(
             id_forum_post=id_forum_group,
             content=comment.content,
             user_id=current_user.id,
