@@ -50,6 +50,8 @@ class GetMediaSchema(BaseModel):
 
     average_score: float
 
+    vote_count: int
+
     user_review: int | None = None
 
     model_config = ConfigDict(from_attributes=True)

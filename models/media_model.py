@@ -65,9 +65,3 @@ class Media(Base):
         cascade='all, delete-orphan',
         init=False,
     )
-
-    # average_score: Mapped[float | None] = column_property(
-    #     select(func.avg(Review.score))
-    #     .where(Review.media_id == id) # id é a coluna 'id' da classe Media
-    #     .scalar_subquery()
-    # )

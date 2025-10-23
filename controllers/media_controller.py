@@ -141,6 +141,7 @@ async def existing_media(media_id: int, session: AsyncSession, current_user_id: 
         raise RecordNotFoundError('Título não encontrado no WatchHive.')
 
     media.average_score = await get_average_score(media.id, session)
+    media.vote_count = await get_votes_count(media.id, session)
 
     if current_user_id:
         review = await session.scalar(
@@ -153,21 +154,61 @@ async def existing_media(media_id: int, session: AsyncSession, current_user_id: 
     return media
 
 
+async def get_best_rated_medias(
+    session: AsyncSession,
+    limit: int,
+):
+    """
+    Retorna uma lista de mídias (filmes ou séries) ordenadas pela pontuação média mais alta.
+
+    A média é calculada apenas para mídias que possuam um número mínimo de votos (MIN_VOTES_THRESHOLD)
+    para evitar que mídias com poucas avaliações tenham pontuação 5.0 indevidamente.
+    """
+    # coluna para calcular
+    average_score = func.avg(Review.score).label("average_score")
+
+    # vote_count = func.count(Review.id).label("vote_count")
+
+    stmt = (
+        select(
+            Media
+        )
+        .join(Review, Media.id == Review.media_id)
+        .group_by(Media.id)                       # Agrupa por Mídia
+        # .having(vote_count >= 5) # mínimo de votos
+        .order_by(desc(average_score))
+        .limit(limit)
+    )
+
+    result = await session.execute(stmt)
+
+    medias: List[Media] = result.scalars().all()
+
+    return medias
+
+
 async def get_average_score(media_id: int, session) -> float:
     """
     Retorna a média das avaliações da mídia.
     """
     stmt = select(func.avg(Review.score)).where(Review.media_id == media_id)
 
-    # 2. Executa a consulta na sessão assíncrona
-    # Awaita o resultado
     result = await session.execute(stmt)
 
-    # 3. Extrai o valor da média
-    # O .scalar_one_or_none() retorna o primeiro (e único) valor escalar
-    # (a média calculada) ou None se o resultado estiver vazio.
     average_score = result.scalar_one_or_none()
 
-    # 4. Trata o caso em que não há avaliações
-    # Se average_score for None (mídia sem reviews), retorna 0.0
+    # se for None (sem reviews), retorna zero
     return average_score if average_score is not None else 0.0
+
+
+async def get_votes_count(media_id: int, session) -> int:
+    """
+    Retorna a quantidad de avaliações da mídia.
+    """
+    stmt = select(func.count(Review.id)).where(Review.media_id == media_id)
+
+    result = await session.execute(stmt)
+
+    vote_count = result.scalar_one_or_none()
+
+    return vote_count if vote_count is not None else 0

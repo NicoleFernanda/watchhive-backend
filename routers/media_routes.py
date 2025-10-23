@@ -6,6 +6,7 @@ from fastapi import APIRouter, Depends, HTTPException, Query
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from controllers.media_controller import (
+    get_best_rated_medias,
     get_media,
     get_random_medias,
     search_medias_by_title,
@@ -73,6 +74,20 @@ async def get_medias_by_genre(
         movie=filter_page.movie,
         limit=filter_page.limit,
         offset=filter_page.offset,
+        session=session,
+    )
+
+    return {'medias': medias}
+
+
+@media_router.get('/best-rated', response_model=ShowMediasInListSchema)
+async def get_best_rated(
+    current_user: CurrentUser,
+    session: Session,
+):
+
+    medias = await get_best_rated_medias(
+        limit=10,
         session=session,
     )
 
