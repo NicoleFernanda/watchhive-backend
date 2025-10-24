@@ -22,3 +22,7 @@ endpoints:
       - Public # Permite acesso externo/Frontend
     
     schemaFilePath: openapi.yaml 
+
+tags:
+  - WebSocket
+  - HTTP

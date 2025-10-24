@@ -95,8 +95,8 @@ paths:
     get:
       tags:
       - users
-      summary: Read User
-      operationId: read_user_users_me_get
+      summary: Read User Me
+      operationId: read_user_me_users_me_get
       responses:
         '200':
           description: Successful Response
@@ -110,8 +110,8 @@ paths:
     get:
       tags:
       - users
-      summary: Search Media
-      operationId: search_media_users_search_get
+      summary: Search User
+      operationId: search_user_users_search_get
       security:
       - OAuth2PasswordBearer: []
       parameters:
@@ -197,25 +197,28 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/HTTPValidationError'
+  /users/{target_user_id}:
     get:
       tags:
       - users
       summary: Read User
-      operationId: read_user_users__user_id__get
+      operationId: read_user_users__target_user_id__get
+      security:
+      - OAuth2PasswordBearer: []
       parameters:
-      - name: user_id
+      - name: target_user_id
         in: path
         required: true
         schema:
           type: integer
-          title: User Id
+          title: Target User Id
       responses:
         '200':
           description: Successful Response
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/GetUserSchema'
+                $ref: '#/components/schemas/GetPublicUserSchema'
         '422':
           description: Validation Error
           content:
@@ -401,6 +404,22 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/HTTPValidationError'
+  /medias/best-rated:
+    get:
+      tags:
+      - media
+      - media_comment
+      summary: Get Best Rated
+      operationId: get_best_rated_medias_best_rated_get
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ShowMediasInListSchema'
+      security:
+      - OAuth2PasswordBearer: []
   /medias/{media_id}:
     get:
       tags:
@@ -518,7 +537,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/GetForumGroupSchema'
+                $ref: '#/components/schemas/GetForumGroupFullSchema'
         '422':
           description: Validation Error
           content:
@@ -545,13 +564,43 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/GetForumGroupSchema'
+                $ref: '#/components/schemas/GetForumGroupFullSchema'
         '422':
           description: Validation Error
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/HTTPValidationError'
+      security:
+      - OAuth2PasswordBearer: []
+  /forum_groups/created:
+    get:
+      tags:
+      - forum_groups
+      summary: Read Creator Groups
+      operationId: read_creator_groups_forum_groups_created_get
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GetForumGroupListSchema'
+      security:
+      - OAuth2PasswordBearer: []
+  /forum_groups/participating:
+    get:
+      tags:
+      - forum_groups
+      summary: Read Participating Groups
+      operationId: read_participating_groups_forum_groups_participating_get
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GetForumGroupListSchema'
       security:
       - OAuth2PasswordBearer: []
   /forum_groups/{forum_group_id}:
@@ -581,7 +630,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/GetForumGroupSchema'
+                $ref: '#/components/schemas/GetForumGroupFullSchema'
         '422':
           description: Validation Error
           content:
@@ -635,7 +684,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/GetForumGroupSchema'
+                $ref: '#/components/schemas/GetForumGroupFullSchema'
         '422':
           description: Validation Error
           content:
@@ -812,6 +861,39 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/HTTPValidationError'
+    put:
+      tags:
+      - forum_messages
+      summary: Create
+      operationId: create_medias__id_media__review_put
+      security:
+      - OAuth2PasswordBearer: []
+      parameters:
+      - name: id_media
+        in: path
+        required: true
+        schema:
+          type: integer
+          title: Id Media
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateReviewSchema'
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GetReviewSchema'
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
   /users/{user_id}/follow:
     post:
       tags:
@@ -929,6 +1011,25 @@ paths:
       - medias
       summary: Get Watch
       operationId: get_watch_medias_lists_to_watch_get
+      security:
+      - OAuth2PasswordBearer: []
+      parameters:
+      - name: offset
+        in: query
+        required: false
+        schema:
+          type: integer
+          minimum: 0
+          default: 0
+          title: Offset
+      - name: limit
+        in: query
+        required: false
+        schema:
+          type: integer
+          minimum: 1
+          default: 50
+          title: Limit
       responses:
         '200':
           description: Successful Response
@@ -936,14 +1037,37 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ShowMediasInListSchema'
-      security:
-      - OAuth2PasswordBearer: []
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
   /medias/lists/watched:
     get:
       tags:
       - medias
       summary: Get Watched
       operationId: get_watched_medias_lists_watched_get
+      security:
+      - OAuth2PasswordBearer: []
+      parameters:
+      - name: offset
+        in: query
+        required: false
+        schema:
+          type: integer
+          minimum: 0
+          default: 0
+          title: Offset
+      - name: limit
+        in: query
+        required: false
+        schema:
+          type: integer
+          minimum: 1
+          default: 50
+          title: Limit
       responses:
         '200':
           description: Successful Response
@@ -951,8 +1075,12 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ShowMediasInListSchema'
-      security:
-      - OAuth2PasswordBearer: []
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
   /:
     get:
       summary: Read Root
@@ -1090,7 +1218,7 @@ components:
       - email
       - password
       title: CreateUserSchema
-    GetForumGroupSchema:
+    GetForumGroupFullSchema:
       properties:
         title:
           type: string
@@ -1122,6 +1250,38 @@ components:
       - user_id
       - messages
       - participants
+      title: GetForumGroupFullSchema
+    GetForumGroupListSchema:
+      properties:
+        groups:
+          items:
+            $ref: '#/components/schemas/GetForumGroupSchema'
+          type: array
+          title: Groups
+      type: object
+      required:
+      - groups
+      title: GetForumGroupListSchema
+    GetForumGroupSchema:
+      properties:
+        id:
+          type: integer
+          title: Id
+        user_id:
+          type: integer
+          title: User Id
+        title:
+          type: string
+          title: Title
+        content:
+          type: string
+          title: Content
+      type: object
+      required:
+      - id
+      - user_id
+      - title
+      - content
       title: GetForumGroupSchema
     GetForumMessageSchema:
       properties:
@@ -1230,6 +1390,17 @@ components:
         average_score:
           type: number
           title: Average Score
+        vote_count:
+          type: integer
+          title: Vote Count
+        user_review:
+          anyOf:
+          - type: integer
+          - type: 'null'
+          title: User Review
+        to_watch_list:
+          type: boolean
+          title: To Watch List
       type: object
       required:
       - id
@@ -1244,7 +1415,69 @@ components:
       - genres
       - comments
       - average_score
+      - vote_count
+      - to_watch_list
       title: GetMediaSchema
+    GetPublicCommentSchema:
+      properties:
+        content:
+          type: string
+          title: Content
+        media_title:
+          type: string
+          title: Media Title
+        media_id:
+          type: integer
+          title: Media Id
+        media_poster_url:
+          type: string
+          title: Media Poster Url
+      type: object
+      required:
+      - content
+      - media_title
+      - media_id
+      - media_poster_url
+      title: GetPublicCommentSchema
+    GetPublicUserSchema:
+      properties:
+        id:
+          type: integer
+          title: Id
+        avatar:
+          type: integer
+          title: Avatar
+        name:
+          type: string
+          title: Name
+        username:
+          type: string
+          title: Username
+        following:
+          type: boolean
+          title: Following
+        total_reviews:
+          type: integer
+          title: Total Reviews
+        total_comments:
+          type: integer
+          title: Total Comments
+        latest_comments:
+          items:
+            $ref: '#/components/schemas/GetPublicCommentSchema'
+          type: array
+          title: Latest Comments
+      type: object
+      required:
+      - id
+      - avatar
+      - name
+      - username
+      - following
+      - total_reviews
+      - total_comments
+      - latest_comments
+      title: GetPublicUserSchema
     GetReviewSchema:
       properties:
         id:
