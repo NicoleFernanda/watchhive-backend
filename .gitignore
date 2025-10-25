@@ -8,7 +8,9 @@ database.db
 databse.db
 z_testes.py
 *old_*
-
+Dockerfile*
+compose*
+gerar_openapi_file.py
 # C extensions
 *.so
 

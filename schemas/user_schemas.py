@@ -1,6 +1,6 @@
 from pydantic import BaseModel, ConfigDict, EmailStr
 
-from schemas.media_schemas import GetPublicCommentSchema
+from schemas.media_schemas import GetPublicCommentFollowerSchema
 
 
 class CreateUserSchema(BaseModel):
@@ -47,4 +47,4 @@ class GetPublicUserSchema(BaseModel):
     following: bool
     total_reviews: int
     total_comments: int
-    latest_comments: list[GetPublicCommentSchema]
+    latest_comments: list[GetPublicCommentFollowerSchema]

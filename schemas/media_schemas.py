@@ -25,7 +25,15 @@ class GetMediaCommentSchema(BaseModel):
     model_config = ConfigDict(from_attributes=True)
 
 
-class GetPublicCommentSchema(BaseModel):
+class GetPublicCommentFollowerSchema(BaseModel):
+    content: str
+    media_title: str
+    media_id: int
+    media_poster_url: str
+
+
+class GetPublicCommentFollowerSchema(BaseModel):
+    user_id: int
     content: str
     media_title: str
     media_id: int

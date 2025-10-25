@@ -1,9 +1,12 @@
-from sqlalchemy import select
+from sqlalchemy import desc, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from controllers.user_controller import existing_user
 from exceptions.business_error import BusinessError
 from models.follows_model import Follows
+from models.media_comment_model import MediaComment
+from models.media_model import Media
+from models.review_model import Review
 
 
 async def follow_user(current_user_id: int, user_to_follow_id: int, session: AsyncSession):
@@ -67,3 +70,65 @@ async def unfollow_user(current_user_id: int, user_to_unfollow_id: int, session:
     if follow:
         await session.delete(follow)
         await session.commit()
+
+
+async def get_following_users_comments(current_user_id: int, session: AsyncSession):
+    """
+    Retorna os útimos comentários de usuários dentrosdas mídias.
+
+    Args:
+        current_user_id (int): usuário logado.
+        session (AsyncSession): sessão do banco de dados ativa.
+    """
+
+    stmt = (
+        select(
+            MediaComment.user_id.label("user_id"),
+            MediaComment.content.label("content"),
+            Media.title.label("media_title"),
+            Media.id.label("media_id"),
+            Media.poster_url.label("media_poster_url"),
+        )
+        .join(Follows, Follows.followed_id == MediaComment.user_id)
+        .join(Media, Media.id == MediaComment.media_id)
+        .where(Follows.follower_id == current_user_id)
+        .order_by(desc(MediaComment.created_at))
+        .limit(7)
+    )
+
+    comments = await session.execute(stmt)
+
+    comments_data = comments.mappings().all()
+
+    return comments_data
+
+
+async def get_following_users_reviews(current_user_id: int, session: AsyncSession):
+    """
+    Retorna os útimos avaliacoes de usuários seguidos.
+
+    Args:
+        current_user_id (int): usuário logado.
+        session (AsyncSession): sessão do banco de dados ativa.
+    """
+
+    stmt = (
+        select(
+            Review.user_id.label("user_id"),
+            Review.score.label("score"),
+            Media.title.label("media_title"),
+            Media.id.label("media_id"),
+            Media.poster_url.label("media_poster_url"),
+        )
+        .join(Follows, Follows.followed_id == Review.user_id)
+        .join(Media, Media.id == Review.media_id)
+        .where(Follows.follower_id == current_user_id)
+        .order_by(desc(Review.created_at))
+        .limit(7)
+    )
+
+    reviews = await session.execute(stmt)
+
+    reviews_data = reviews.mappings().all()
+
+    return reviews_data

@@ -1,20 +1,51 @@
 from http import HTTPStatus
-from typing import Annotated
+from typing import Annotated, List
 
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from controllers.follows_controller import follow_user, unfollow_user
+from controllers.follows_controller import follow_user, get_following_users_comments, get_following_users_reviews, unfollow_user
 from database import get_session
 from exceptions.business_error import BusinessError
 from exceptions.record_not_found_error import RecordNotFoundError
 from models.user_model import User
 from schemas.commons_schemas import Message
+from schemas.media_schemas import GetPublicCommentFollowerSchema
+from schemas.review_schemas import GetPublicReviewFollowerSchema
 from security import get_current_user
 
 follows_router = APIRouter(prefix="/users", tags=['users'])
 Session = Annotated[AsyncSession, Depends(get_session)]
 CurrentUser = Annotated[User, Depends(get_current_user)]
+
+
+@follows_router.get('/following/comments', response_model=List[GetPublicCommentFollowerSchema])
+async def get_following_latest_comments(
+    current_user: CurrentUser,
+    session: Session,
+):
+    try:
+        return await get_following_users_comments(
+            current_user_id=current_user.id,
+            session=session,
+        )
+    except RecordNotFoundError as u:
+        raise HTTPException(status_code=HTTPStatus.NOT_FOUND, detail=str(u))
+    
+
+
+@follows_router.get('/following/reviews', response_model=List[GetPublicReviewFollowerSchema])
+async def get_following_latest_reviews(
+    current_user: CurrentUser,
+    session: Session,
+):
+    try:
+        return await get_following_users_reviews(
+            current_user_id=current_user.id,
+            session=session,
+        )
+    except RecordNotFoundError as u:
+        raise HTTPException(status_code=HTTPStatus.NOT_FOUND, detail=str(u))
 
 
 @follows_router.post('/{user_id}/follow', status_code=HTTPStatus.OK, response_model=Message)

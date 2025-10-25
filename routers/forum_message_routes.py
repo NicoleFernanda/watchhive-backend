@@ -1,10 +1,9 @@
 from http import HTTPStatus
 from typing import Annotated
 
-from fastapi import APIRouter, Depends, HTTPException, WebSocket, WebSocketDisconnect
+from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from controllers import websocket_manager
 from controllers.forum_comment_controller import send_forum_message, delete_forum_message
 from database import get_session
 from exceptions.permission_error import PermissionError
@@ -49,33 +48,3 @@ async def delete(id_forum_group: int, id_message: int, current_user: CurrentUser
         raise HTTPException(status_code=HTTPStatus.FORBIDDEN, detail=str(p))
     except RecordNotFoundError as u:
         raise HTTPException(status_code=HTTPStatus.NOT_FOUND, detail=str(u))
-
-# ALTERADO
-@forum_message_router.websocket("/{id_forum_group}/ws")
-async def websocket_message_endpoint(websocket: WebSocket, id_forum_group: int, current_user: CurrentUser):
-    # Nota: A validação do usuário logado (current_user) via Depends em um endpoint WS
-    # é avançada e geralmente requer um token JWT nos headers ou cookies. 
-    # Se você ainda não tem essa validação no WS, comece apenas com 'id_forum_group: int'.
-
-    # 1. Conecta o cliente ao manager
-    await websocket_manager.connect(id_forum_group, websocket)
-
-    try:
-        # Loop para manter a conexão ativa. Se o cliente enviar algo, o WS recebe.
-        # Mesmo que você não processe o dado (pois o envio é via POST), o loop mantém o canal aberto.
-        while True:
-            # Espera por qualquer dado enviado pelo cliente WS.
-            # O timeout aqui é indefinido, esperando pela desconexão.
-            data = await websocket.receive_text()
-            
-            # OPCIONAL: Se você quiser que o cliente WS envie algo além da mensagem (ex: "digitando..."),
-            # você processaria esse 'data' e faria um broadcast específico para "status".
-            
-    except WebSocketDisconnect:
-        # 2. Desconecta o cliente
-        websocket_manager.disconnect(id_forum_group, websocket)
-        
-    except Exception as e:
-        # Lidar com outros erros e garantir a desconexão
-        print(f"Erro no WebSocket: {e}")
-        websocket_manager.disconnect(id_forum_group, websocket)

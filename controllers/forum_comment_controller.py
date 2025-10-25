@@ -1,7 +1,6 @@
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from controllers import websocket_manager
 from controllers.forum_group_controller import existing_forum_group
 from exceptions.permission_error import PermissionError
 from exceptions.record_not_found_error import RecordNotFoundError
@@ -48,12 +47,6 @@ async def send_forum_message(id_forum_post: str, content: str, user_id: id, sess
     await session.commit()
     await session.refresh(comment)
 
-    # ALTERADO
-    message_schema = GetForumMessageSchema.model_validate(comment)
-    message_json = message_schema.model_dump_json()
-    await websocket_manager.broadcast_to_group(group.id, message_json)
-    # ALTERADO
-    
     return comment
 
 
