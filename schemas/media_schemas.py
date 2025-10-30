@@ -2,6 +2,7 @@ from datetime import date
 
 from pydantic import BaseModel, ConfigDict, Field
 
+from models.media_model import Media
 from schemas.commons_schemas import FilterPage
 
 
@@ -93,6 +94,17 @@ class ShowMediaInListSchema(BaseModel):
     title: str
     poster_url: str | None
 
+    model_config = ConfigDict(from_attributes=True)
+
 
 class ShowMediasInListSchema(BaseModel):
     medias: list[ShowMediaInListSchema]
+
+
+class ShowMediaInListSchema2(ShowMediaInListSchema):
+    average_score: float
+
+    model_config = ConfigDict(from_attributes=True)
+
+class ShowMediasInListSchema2(BaseModel):
+    medias: list[ShowMediaInListSchema2]

@@ -9,6 +9,7 @@ from controllers.media_controller import (
     get_best_rated_medias,
     get_media,
     get_random_medias,
+    get_recommended_medias,
     search_medias_by_title,
     show_medias_by_genre_page,
 )
@@ -21,12 +22,28 @@ from schemas.media_schemas import (
     FilterMediaShow,
     GetMediaSchema,
     ShowMediasInListSchema,
+    ShowMediasInListSchema2,
 )
 from security import get_current_user
 
 media_router = APIRouter(prefix='/medias', tags=['media', 'media_comment'])
 Session = Annotated[AsyncSession, Depends(get_session)]
 CurrentUser = Annotated[User, Depends(get_current_user)]
+
+
+@media_router.get('/recommendations/teste', response_model=ShowMediasInListSchema2)
+async def recommend_medias(
+    current_user: CurrentUser,
+    session: Session,
+):
+
+    medias = await get_recommended_medias(
+        limit=10,
+        session=session,
+        current_user_id=current_user.id
+    )
+
+    return {'medias': medias}
 
 
 @media_router.get('/random', response_model=ShowMediasInListSchema)
