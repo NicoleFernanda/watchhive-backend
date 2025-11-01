@@ -20,14 +20,6 @@ app = FastAPI(
     title='WatchHive'
 )
 
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=['*'],
-    allow_credentials=True,
-    allow_methods=['*'],
-    allow_headers=['Authorization', 'Content-Type', '*'],
-)
-
 app.include_router(user_router)
 app.include_router(auth_router)
 app.include_router(media_router)
@@ -39,6 +31,13 @@ app.include_router(review_router)
 app.include_router(follows_router)
 app.include_router(user_list_router)
 
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=['*'],
+    allow_credentials=True,
+    allow_methods=['*'],
+    allow_headers=['Authorization', 'Content-Type', '*'],
+)
 
 @app.get('/')
 async def read_root():
