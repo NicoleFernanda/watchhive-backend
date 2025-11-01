@@ -203,14 +203,16 @@ async def get_best_rated_medias(
 async def get_recommended_medias(current_user_id: int, limit: int, session: AsyncSession):
     """
     Retorna filmes recomedados a partir da última avaliação do usuário.
+    A partir dos gêneros do último filme/série avaliado(a), retorna uma lista de mídias
+    com as melhores médias de avaliações dos outros usuários da plataforma.
+
+    Caso o usuário já tenha assistido, não é considerado.
 
     Args:
         current_user_id (int): id do usuário logado
         limit (int): limite de mídias
         session (AsyncSession): sessão ativa do banco
     """
-
-    PRIORITY_GENRE_IDS = [28, 12, 16, 18, 35, 10751]
 
     stmt_last_review = (
         select(Review.media_id)
@@ -224,19 +226,6 @@ async def get_recommended_medias(current_user_id: int, limit: int, session: Asyn
         .where(media_genre.c.media_id.in_(select(stmt_last_review.c.media_id)))
     ).cte("GenerosRecomendados")
 
-    stmt_genre_score = (
-        select(
-            media_genre.c.media_id.label("media_id"),
-            func.sum(
-                case(
-                    (media_genre.c.genre_id.in_(PRIORITY_GENRE_IDS), 1), 
-                    else_=0
-                )
-            ).label("genre_score")
-        )
-        .group_by(media_genre.c.media_id)
-    ).cte("GenreScoreRank")
-
     stmt_internal_rank = (
         select(
             Review.media_id.label("media_id"),
@@ -244,38 +233,41 @@ async def get_recommended_medias(current_user_id: int, limit: int, session: Asyn
             func.count(Review.id).label("internal_count")
         )
         .group_by(Review.media_id)
-    ).cte("InternalRank")
+    ).cte("MediaDosFilmes")
 
-    final_vote_score = func.coalesce(
-        stmt_internal_rank.c.internal_avg, Media.vote_average
-    ).label("final_vote_score")
+    watched_user_list_id_stmt = (
+        select(UserList.id)
+        .where(
+            (UserList.user_id == current_user_id) & 
+            (UserList.name == ListType.WATCHED)
+        )
+    ).scalar_subquery()
+
+    stm_already_seen = (
+        select(UserListMedia.media_id.label("id"))
+        .where(
+            UserListMedia.user_list_id == watched_user_list_id_stmt
+        )
+    ).cte("MidiasAssistidas")
 
     final_select = (
         select(
-            Media.id, 
-            Media.title, 
-            Media.poster_url, 
-            # O score médio agora é EXCLUSIVAMENTE o score interno (internal_avg)
-            stmt_internal_rank.c.internal_avg.label("average_score")
+            Media.id,
+            Media.title,
+            Media.poster_url,
         ) 
-        # INNER JOIN: Garante que só filmes com REVIEWS internas sejam considerados.
+        # garante que apenas filmes com reviews sejam considerados
         .join(stmt_internal_rank, Media.id == stmt_internal_rank.c.media_id)
-        # INNER JOIN: Garante que só filmes que têm GÊNEROS calculados sejam considerados.
-        # .join(stmt_genre_score, Media.id == stmt_genre_score.c.media_id)
-        
         .where(
-            # Filtra por score de gênero > 0
-            # stmt_genre_score.c.genre_score > 0, 
             Media.id.in_(
                 select(media_genre.c.media_id)
                 .where(media_genre.c.genre_id.in_(select(stmt_generos.c.genre_id)))
             ),
             Media.id != select(stmt_last_review.c.media_id).scalar_subquery(),
+            Media.id.notin_(select(stm_already_seen.c.id)),
         )
         .order_by(
-            # desc(stmt_genre_score.c.genre_score), 
             desc(stmt_internal_rank.c.internal_avg), 
-            desc(Media.id), 
         )
         .limit(limit)
     )
@@ -286,8 +278,7 @@ async def get_recommended_medias(current_user_id: int, limit: int, session: Asyn
         {
             "id": row[0],
             "title": row[1],
-            "poster_url": row[2],
-            "average_score": row[3]
+            "poster_url": row[2]
         }
         for row in result.unique()
     ]

@@ -31,7 +31,7 @@ Session = Annotated[AsyncSession, Depends(get_session)]
 CurrentUser = Annotated[User, Depends(get_current_user)]
 
 
-@media_router.get('/recommendations/teste', response_model=ShowMediasInListSchema2)
+@media_router.get('/recommendations', response_model=ShowMediasInListSchema2)
 async def recommend_medias(
     current_user: CurrentUser,
     session: Session,
