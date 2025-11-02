@@ -281,7 +281,7 @@ async def get_public_user_profile(
 ) -> Dict[str, Any]:
 
     # checa se usuário existe
-    existing_user(target_user_id, session)
+    await existing_user(target_user_id, session)
 
     # quantidade de reviews
     sub_reviews = select(func.count(Review.id)).where(Review.user_id == target_user_id).scalar_subquery()
