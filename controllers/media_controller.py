@@ -1,6 +1,6 @@
 from typing import List
 
-from sqlalchemy import case, desc, func, literal_column, select, text
+from sqlalchemy import desc, func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
 
@@ -238,7 +238,7 @@ async def get_recommended_medias(current_user_id: int, limit: int, session: Asyn
     watched_user_list_id_stmt = (
         select(UserList.id)
         .where(
-            (UserList.user_id == current_user_id) & 
+            (UserList.user_id == current_user_id) &
             (UserList.name == ListType.WATCHED)
         )
     ).scalar_subquery()
@@ -255,7 +255,7 @@ async def get_recommended_medias(current_user_id: int, limit: int, session: Asyn
             Media.id,
             Media.title,
             Media.poster_url,
-        ) 
+        )
         # garante que apenas filmes com reviews sejam considerados
         .join(stmt_internal_rank, Media.id == stmt_internal_rank.c.media_id)
         .where(
@@ -267,7 +267,7 @@ async def get_recommended_medias(current_user_id: int, limit: int, session: Asyn
             Media.id.notin_(select(stm_already_seen.c.id)),
         )
         .order_by(
-            desc(stmt_internal_rank.c.internal_avg), 
+            desc(stmt_internal_rank.c.internal_avg),
         )
         .limit(limit)
     )

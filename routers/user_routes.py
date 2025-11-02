@@ -167,7 +167,7 @@ async def read_user(
     except Exception as e:
         # AQUI VOCÊ CAPTURA QUALQUER NOVO ERRO (QUE ESTÁ DANDO O SEU 500)
         # print(f"Erro inesperado no perfil: {e}") # Loga no servidor
-        
+
         # O detail VAI EXPÔR O ERRO NO FRONT-END, PERMITINDO O DIAGNÓSTICO
         raise HTTPException(
             status_code=HTTPStatus.INTERNAL_SERVER_ERROR,

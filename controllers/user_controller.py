@@ -321,6 +321,7 @@ async def get_public_user_profile(
     stmt_comments = select(
         MediaComment.content,
         MediaComment.created_at,
+        MediaComment.user_id,
         Media.id.label("media_id"),
         Media.title.label("media_title"),
         Media.poster_url.label("media_poster_url")

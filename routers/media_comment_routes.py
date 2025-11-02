@@ -46,5 +46,3 @@ async def delete(id_media: int, id_comment: int, current_user: CurrentUser, sess
         raise HTTPException(status_code=HTTPStatus.FORBIDDEN, detail=str(p))
     except RecordNotFoundError as u:
         raise HTTPException(status_code=HTTPStatus.NOT_FOUND, detail=str(u))
-
-

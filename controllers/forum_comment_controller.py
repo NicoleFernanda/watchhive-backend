@@ -6,7 +6,6 @@ from exceptions.permission_error import PermissionError
 from exceptions.record_not_found_error import RecordNotFoundError
 from models.forum_message_model import ForumMessage
 from models.forum_participant_model import ForumParticipant
-from schemas.forum_schemas import GetForumMessageSchema
 
 
 async def send_forum_message(id_forum_post: str, content: str, user_id: id, session: AsyncSession) -> ForumMessage:
@@ -29,7 +28,7 @@ async def send_forum_message(id_forum_post: str, content: str, user_id: id, sess
 
     participant = await session.scalar(
         select(ForumParticipant).where(
-            (ForumParticipant.user_id == user_id) & 
+            (ForumParticipant.user_id == user_id) &
             (ForumParticipant.forum_group_id == group.id)
         )
     )

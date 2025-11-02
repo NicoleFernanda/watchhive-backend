@@ -4,7 +4,12 @@ from typing import Annotated, List
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from controllers.follows_controller import follow_user, get_following_users_comments, get_following_users_reviews, unfollow_user
+from controllers.follows_controller import (
+    follow_user,
+    get_following_users_comments,
+    get_following_users_reviews,
+    unfollow_user,
+)
 from database import get_session
 from exceptions.business_error import BusinessError
 from exceptions.record_not_found_error import RecordNotFoundError
@@ -31,7 +36,6 @@ async def get_following_latest_comments(
         )
     except RecordNotFoundError as u:
         raise HTTPException(status_code=HTTPStatus.NOT_FOUND, detail=str(u))
-    
 
 
 @follows_router.get('/following/reviews', response_model=List[GetPublicReviewFollowerSchema])
