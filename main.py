@@ -31,12 +31,12 @@ app.include_router(review_router)
 app.include_router(follows_router)
 app.include_router(user_list_router)
 
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=['*'],
-    allow_methods=['*'],
-    allow_headers=['Authorization', 'Content-Type', '*'],
-)
+# app.add_middleware(
+#     CORSMiddleware,
+#     allow_origins=['*'],
+#     allow_methods=['*'],
+#     allow_headers=['Authorization', 'Content-Type', '*'],
+# )
 
 @app.get('/')
 async def read_root():
