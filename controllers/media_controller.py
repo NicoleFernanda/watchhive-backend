@@ -255,6 +255,7 @@ async def get_recommended_medias(current_user_id: int, limit: int, session: Asyn
             Media.id,
             Media.title,
             Media.poster_url,
+            stmt_internal_rank.c.internal_avg,
         )
         # garante que apenas filmes com reviews sejam considerados
         .join(stmt_internal_rank, Media.id == stmt_internal_rank.c.media_id)
@@ -278,7 +279,8 @@ async def get_recommended_medias(current_user_id: int, limit: int, session: Asyn
         {
             "id": row[0],
             "title": row[1],
-            "poster_url": row[2]
+            "poster_url": row[2],
+            "average_score": row[3],
         }
         for row in result.unique()
     ]
