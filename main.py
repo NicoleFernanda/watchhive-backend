@@ -31,9 +31,11 @@ app.include_router(review_router)
 app.include_router(follows_router)
 app.include_router(user_list_router)
 
+print(f"DEBUG: FastAPI está lendo estas Origens para CORS: {settings.get_allowed_origins()}")
+
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=settings.get_allowed_origins(),
+    allow_origins=['https://cb2c9f90-c05a-429e-ad6d-5c4fe716793f.e1-us-east-azure.choreoapps.dev', 'http://localhost:5173'],
     allow_credentials=True,
     allow_methods=['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
     allow_headers=['Authorization', 'Content-Type', 'Accept'],
