@@ -18,3 +18,7 @@ class GetPublicReviewFollowerSchema(BaseModel):
     media_title: str
     media_id: int
     media_poster_url: str
+
+
+class GetPublicReviewsFollowerSchema(BaseModel):
+    reviews: list[GetPublicReviewFollowerSchema]

@@ -40,6 +40,9 @@ class GetPublicCommentFollowerSchema(BaseModel):
     media_poster_url: str
 
 
+class GetPublicCommentsFollowerSchema(BaseModel):
+    comments: list[GetPublicCommentFollowerSchema]
+
 # media
 class GetMediaSchema(BaseModel):
     id: int
