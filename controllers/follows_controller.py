@@ -71,6 +71,9 @@ async def unfollow_user(current_user_id: int, user_to_unfollow_id: int, session:
         await session.delete(follow)
         await session.commit()
 
+    else:
+        raise BusinessError("Não foi possível deixar de seguir usuário.")
+
 
 async def get_following_users_comments(current_user_id: int, session: AsyncSession):
     """

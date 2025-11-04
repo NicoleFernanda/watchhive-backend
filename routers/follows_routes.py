@@ -19,20 +19,9 @@ from schemas.media_schemas import GetPublicCommentFollowerSchema, GetPublicComme
 from schemas.review_schemas import GetPublicReviewFollowerSchema, GetPublicReviewsFollowerSchema
 from security import get_current_user
 
-follows_router = APIRouter(prefix="/users", tags=['users'])
+follows_router = APIRouter(prefix="/follows", tags=['users'])
 Session = Annotated[AsyncSession, Depends(get_session)]
 CurrentUser = Annotated[User, Depends(get_current_user)]
-
-
-# Handlers OPTIONS explícitos para resolver CORS nos endpoints problemáticos
-@follows_router.options('/following_comments')
-async def options_following_comments():
-    return {"status": "ok"}
-
-
-@follows_router.options('/following_reviews')
-async def options_following_reviews():
-    return {"status": "ok"}
 
 
 @follows_router.get('/following_comments', response_model=GetPublicCommentsFollowerSchema)
@@ -89,9 +78,12 @@ async def delete(
     session: Session,
     current_user: CurrentUser
 ):
-    await unfollow_user(
-        current_user_id=current_user.id,
-        user_to_unfollow_id=user_id,
-        session=session,
-    )
-    return {'message': 'Deixou de seguir usuário.'}
+    try:
+        await unfollow_user(
+            current_user_id=current_user.id,
+            user_to_unfollow_id=user_id,
+            session=session,
+        )
+        return {'message': 'Deixou de seguir usuário.'}
+    except BusinessError as e:
+        raise HTTPException(status_code=HTTPStatus.CONFLICT, detail=str(e))
