@@ -24,6 +24,16 @@ Session = Annotated[AsyncSession, Depends(get_session)]
 CurrentUser = Annotated[User, Depends(get_current_user)]
 
 
+@follows_router.options('/following_comments')
+async def options_following_comments():
+    return {"status": "ok"}
+
+
+@follows_router.options('/following_reviews')
+async def options_following_reviews():
+    return {"status": "ok"}
+
+
 @follows_router.get('/following_comments', response_model=GetPublicCommentsFollowerSchema)
 async def get_following_latest_comments(
     current_user: CurrentUser,
