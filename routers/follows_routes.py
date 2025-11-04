@@ -24,6 +24,17 @@ Session = Annotated[AsyncSession, Depends(get_session)]
 CurrentUser = Annotated[User, Depends(get_current_user)]
 
 
+# Handlers OPTIONS explícitos para resolver CORS nos endpoints problemáticos
+@follows_router.options('/following/comments')
+async def options_following_comments():
+    return {"status": "ok"}
+
+
+@follows_router.options('/following/reviews')
+async def options_following_reviews():
+    return {"status": "ok"}
+
+
 @follows_router.get('/following/comments', response_model=GetPublicCommentsFollowerSchema)
 async def get_following_latest_comments(
     current_user: CurrentUser,
@@ -50,7 +61,7 @@ async def get_following_latest_reviews(
             current_user_id=current_user.id,
             session=session,
         )
-    
+
         return {'reviews': reviews}
     except RecordNotFoundError as u:
         raise HTTPException(status_code=HTTPStatus.NOT_FOUND, detail=str(u))
