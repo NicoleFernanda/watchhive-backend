@@ -19,7 +19,7 @@ from schemas.media_schemas import GetPublicCommentFollowerSchema, GetPublicComme
 from schemas.review_schemas import GetPublicReviewFollowerSchema, GetPublicReviewsFollowerSchema
 from security import get_current_user
 
-follows_router = APIRouter(prefix="/follows", tags=['users'])
+follows_router = APIRouter(prefix="/relationship", tags=['users'])
 Session = Annotated[AsyncSession, Depends(get_session)]
 CurrentUser = Annotated[User, Depends(get_current_user)]
 
