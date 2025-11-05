@@ -24,17 +24,17 @@ Session = Annotated[AsyncSession, Depends(get_session)]
 CurrentUser = Annotated[User, Depends(get_current_user)]
 
 
-@follows_router.options('/following_comments')
+@follows_router.options('/comments')
 async def options_following_comments():
     return {"status": "ok"}
 
 
-@follows_router.options('/following_reviews')
+@follows_router.options('/reviews')
 async def options_following_reviews():
     return {"status": "ok"}
 
 
-@follows_router.get('/following_comments', response_model=GetPublicCommentsFollowerSchema)
+@follows_router.get('/comments', response_model=GetPublicCommentsFollowerSchema)
 async def get_following_latest_comments(
     current_user: CurrentUser,
     session: Session,
@@ -50,7 +50,7 @@ async def get_following_latest_comments(
         raise HTTPException(status_code=HTTPStatus.NOT_FOUND, detail=str(u))
 
 
-@follows_router.get('/following_reviews', response_model=GetPublicReviewsFollowerSchema)
+@follows_router.get('/reviews', response_model=GetPublicReviewsFollowerSchema)
 async def get_following_latest_reviews(
     current_user: CurrentUser,
     session: Session,
