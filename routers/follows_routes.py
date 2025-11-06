@@ -1,7 +1,7 @@
 from http import HTTPStatus
 from typing import Annotated, List
 
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, Response
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from controllers.follows_controller import (
@@ -24,11 +24,36 @@ Session = Annotated[AsyncSession, Depends(get_session)]
 CurrentUser = Annotated[User, Depends(get_current_user)]
 
 
+@follows_router.options('/comments')
+async def options_following_comments(response: Response):
+    response.headers["Access-Control-Allow-Origin"] = "https://cb2c9f90-c05a-429e-ad6d-5c4fe716793f.e1-us-east-azure.choreoapps.dev"
+    response.headers["Access-Control-Allow-Methods"] = "GET, POST, PUT, DELETE, PATCH, OPTIONS"
+    response.headers["Access-Control-Allow-Headers"] = "Authorization, Content-Type, Accept"
+    response.headers["Access-Control-Allow-Credentials"] = "true"
+    return {"status": "ok"}
+
+
+@follows_router.options('/reviews')
+async def options_following_reviews(response: Response):
+    response.headers["Access-Control-Allow-Origin"] = "https://cb2c9f90-c05a-429e-ad6d-5c4fe716793f.e1-us-east-azure.choreoapps.dev"
+    response.headers["Access-Control-Allow-Methods"] = "GET, POST, PUT, DELETE, PATCH, OPTIONS" 
+    response.headers["Access-Control-Allow-Headers"] = "Authorization, Content-Type, Accept"
+    response.headers["Access-Control-Allow-Credentials"] = "true"
+    return {"status": "ok"}
+
+
 @follows_router.get('/comments', response_model=GetPublicCommentsFollowerSchema)
 async def get_following_latest_comments(
     current_user: CurrentUser,
     session: Session,
+    response: Response,
 ):
+    # Adicionar cabeçalhos CORS explicitamente para este endpoint
+    response.headers["Access-Control-Allow-Origin"] = "https://cb2c9f90-c05a-429e-ad6d-5c4fe716793f.e1-us-east-azure.choreoapps.dev"
+    response.headers["Access-Control-Allow-Methods"] = "GET, POST, PUT, DELETE, PATCH, OPTIONS"
+    response.headers["Access-Control-Allow-Headers"] = "Authorization, Content-Type, Accept"
+    response.headers["Access-Control-Allow-Credentials"] = "true"
+    
     try:
         comments = await get_following_users_comments(
             current_user_id=current_user.id,
@@ -44,7 +69,14 @@ async def get_following_latest_comments(
 async def get_following_latest_reviews(
     current_user: CurrentUser,
     session: Session,
+    response: Response,
 ):
+    # Adicionar cabeçalhos CORS explicitamente para este endpoint
+    response.headers["Access-Control-Allow-Origin"] = "https://cb2c9f90-c05a-429e-ad6d-5c4fe716793f.e1-us-east-azure.choreoapps.dev"
+    response.headers["Access-Control-Allow-Methods"] = "GET, POST, PUT, DELETE, PATCH, OPTIONS"
+    response.headers["Access-Control-Allow-Headers"] = "Authorization, Content-Type, Accept"
+    response.headers["Access-Control-Allow-Credentials"] = "true"
+    
     try:
         reviews = await get_following_users_reviews(
             current_user_id=current_user.id,
