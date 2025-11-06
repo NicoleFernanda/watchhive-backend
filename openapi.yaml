@@ -265,6 +265,22 @@ paths:
                 $ref: '#/components/schemas/Token'
       security:
       - OAuth2PasswordBearer: []
+  /medias/recommendations:
+    get:
+      tags:
+      - media
+      - media_comment
+      summary: Recommend Medias
+      operationId: recommend_medias_medias_recommendations_get
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ShowMediasInListSchema2'
+      security:
+      - OAuth2PasswordBearer: []
   /medias/random:
     get:
       tags:
@@ -894,12 +910,42 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/HTTPValidationError'
-  /users/{user_id}/follow:
+  /relationship/comments:
+    get:
+      tags:
+      - users
+      summary: Get Following Latest Comments
+      operationId: get_following_latest_comments_relationship_comments_get
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GetPublicCommentsFollowerSchema'
+      security:
+      - OAuth2PasswordBearer: []
+  /relationship/reviews:
+    get:
+      tags:
+      - users
+      summary: Get Following Latest Reviews
+      operationId: get_following_latest_reviews_relationship_reviews_get
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GetPublicReviewsFollowerSchema'
+      security:
+      - OAuth2PasswordBearer: []
+  /relationship/{user_id}/follow:
     post:
       tags:
       - users
       summary: Create
-      operationId: create_users__user_id__follow_post
+      operationId: create_relationship__user_id__follow_post
       security:
       - OAuth2PasswordBearer: []
       parameters:
@@ -922,12 +968,12 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/HTTPValidationError'
-  /users/{user_id}/unfollow:
+  /relationship/{user_id}/unfollow:
     delete:
       tags:
       - users
       summary: Delete
-      operationId: delete_users__user_id__unfollow_delete
+      operationId: delete_relationship__user_id__unfollow_delete
       security:
       - OAuth2PasswordBearer: []
       parameters:
@@ -1418,8 +1464,11 @@ components:
       - vote_count
       - to_watch_list
       title: GetMediaSchema
-    GetPublicCommentSchema:
+    GetPublicCommentFollowerSchema:
       properties:
+        user_id:
+          type: integer
+          title: User Id
         content:
           type: string
           title: Content
@@ -1434,11 +1483,59 @@ components:
           title: Media Poster Url
       type: object
       required:
+      - user_id
       - content
       - media_title
       - media_id
       - media_poster_url
-      title: GetPublicCommentSchema
+      title: GetPublicCommentFollowerSchema
+    GetPublicCommentsFollowerSchema:
+      properties:
+        comments:
+          items:
+            $ref: '#/components/schemas/GetPublicCommentFollowerSchema'
+          type: array
+          title: Comments
+      type: object
+      required:
+      - comments
+      title: GetPublicCommentsFollowerSchema
+    GetPublicReviewFollowerSchema:
+      properties:
+        user_id:
+          type: integer
+          title: User Id
+        score:
+          type: integer
+          title: Score
+        media_title:
+          type: string
+          title: Media Title
+        media_id:
+          type: integer
+          title: Media Id
+        media_poster_url:
+          type: string
+          title: Media Poster Url
+      type: object
+      required:
+      - user_id
+      - score
+      - media_title
+      - media_id
+      - media_poster_url
+      title: GetPublicReviewFollowerSchema
+    GetPublicReviewsFollowerSchema:
+      properties:
+        reviews:
+          items:
+            $ref: '#/components/schemas/GetPublicReviewFollowerSchema'
+          type: array
+          title: Reviews
+      type: object
+      required:
+      - reviews
+      title: GetPublicReviewsFollowerSchema
     GetPublicUserSchema:
       properties:
         id:
@@ -1464,7 +1561,7 @@ components:
           title: Total Comments
         latest_comments:
           items:
-            $ref: '#/components/schemas/GetPublicCommentSchema'
+            $ref: '#/components/schemas/GetPublicCommentFollowerSchema'
           type: array
           title: Latest Comments
       type: object
@@ -1592,6 +1689,29 @@ components:
       - title
       - poster_url
       title: ShowMediaInListSchema
+    ShowMediaInListSchema2:
+      properties:
+        id:
+          type: integer
+          title: Id
+        title:
+          type: string
+          title: Title
+        poster_url:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Poster Url
+        average_score:
+          type: number
+          title: Average Score
+      type: object
+      required:
+      - id
+      - title
+      - poster_url
+      - average_score
+      title: ShowMediaInListSchema2
     ShowMediasInListSchema:
       properties:
         medias:
@@ -1603,6 +1723,17 @@ components:
       required:
       - medias
       title: ShowMediasInListSchema
+    ShowMediasInListSchema2:
+      properties:
+        medias:
+          items:
+            $ref: '#/components/schemas/ShowMediaInListSchema2'
+          type: array
+          title: Medias
+      type: object
+      required:
+      - medias
+      title: ShowMediasInListSchema2
     Token:
       properties:
         access_token:
