@@ -1,9 +1,8 @@
 
 
 import uvicorn
-from fastapi import FastAPI, Request, Response
+from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from starlette.middleware.base import BaseHTTPMiddleware
 
 from routers.auth_routes import auth_router
 from routers.follows_routes import follows_router
@@ -32,30 +31,6 @@ app.include_router(review_router)
 app.include_router(follows_router)
 app.include_router(user_list_router)
 
-
-class CorsFixMiddleware(BaseHTTPMiddleware):
-    async def dispatch(self, request: Request, call_next):
-        response = await call_next(request)
-        
-        # Aplicar cabeçalhos CORS especificamente para endpoints problemáticos
-        if request.url.path in ["/relationship/comments", "/relationship/reviews"]:
-            response.headers["Access-Control-Allow-Origin"] = "https://cb2c9f90-c05a-429e-ad6d-5c4fe716793f.e1-us-east-azure.choreoapps.dev"
-            response.headers["Access-Control-Allow-Methods"] = "GET, POST, PUT, DELETE, PATCH, OPTIONS"
-            response.headers["Access-Control-Allow-Headers"] = "Authorization, Content-Type, Accept"
-            response.headers["Access-Control-Allow-Credentials"] = "true"
-        
-        # Para requisições OPTIONS, retornar 200 com cabeçalhos CORS
-        if request.method == "OPTIONS" and request.url.path in ["/relationship/comments", "/relationship/reviews"]:
-            response = Response(status_code=200)
-            response.headers["Access-Control-Allow-Origin"] = "https://cb2c9f90-c05a-429e-ad6d-5c4fe716793f.e1-us-east-azure.choreoapps.dev"
-            response.headers["Access-Control-Allow-Methods"] = "GET, POST, PUT, DELETE, PATCH, OPTIONS"
-            response.headers["Access-Control-Allow-Headers"] = "Authorization, Content-Type, Accept"
-            response.headers["Access-Control-Allow-Credentials"] = "true"
-        
-        return response
-
-# Adicionar o middleware personalizado primeiro
-app.add_middleware(CorsFixMiddleware)
 
 app.add_middleware(
     CORSMiddleware,
