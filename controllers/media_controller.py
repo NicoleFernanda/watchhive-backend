@@ -216,7 +216,10 @@ async def get_recommended_medias(current_user_id: int, limit: int, session: Asyn
 
     stmt_last_review = (
         select(Review.media_id)
-        .where(Review.user_id == current_user_id)
+        .where(
+            (Review.user_id == current_user_id) &
+            (Review.score >= 4)
+        )
         .order_by(desc(Review.created_at))
         .limit(1)
     ).cte("UltimaReview")
